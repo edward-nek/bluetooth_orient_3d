@@ -27,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<BluetoothDevice> mDevices = new ArrayList<>();
     private ListView listDevices;
 
+    //базы хранения данных о маячках
     public static BaseDevices mBaseDevices = new BaseDevices();
+    public static BaseBeacon mBaseBeacon = new BaseBeacon();
+
 
     private DeviceListAdapter mDeviceListAdapter;
 

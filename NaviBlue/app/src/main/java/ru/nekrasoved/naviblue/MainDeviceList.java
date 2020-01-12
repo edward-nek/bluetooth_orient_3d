@@ -9,12 +9,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 
 public class MainDeviceList extends AppCompatActivity{
 
+    public int pos;
+    public Spinner mSpinner;
+    public EditText etX;
+    public EditText etY;
+    public EditText etZ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +28,10 @@ public class MainDeviceList extends AppCompatActivity{
         setContentView(R.layout.list_devices);
 
         Button btBack = (Button)findViewById(R.id.btBack);
+
+        etX = (EditText) findViewById(R.id.etX);
+        etY = (EditText) findViewById(R.id.etY);
+        etZ = (EditText) findViewById(R.id.etZ);
 
         btBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,25 +51,49 @@ public class MainDeviceList extends AppCompatActivity{
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, MainActivity.mBaseDevices.spinner_name);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setAdapter(adapter);
+        mSpinner = (Spinner) findViewById(R.id.spinner);
+        mSpinner.setAdapter(adapter);
 
-//        // заголовок
-//        spinner.setPrompt("Title");
-//
-//        // выделяем элемент
-//        spinner.setSelection(1);
-//
-//        // устанавливаем обработчик нажатия
-//
-//        spinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//
-//                // показываем позиция нажатого элемента
-//                Toast.makeText(getBaseContext(), "Position = " + position, Toast.LENGTH_SHORT).show();
-//            }
-//        });
+        // слушатель выбора в списке
+        AdapterView.OnItemSelectedListener itemListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                pos = position;
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        };
+        if (MainActivity.mBaseDevices.name.size() > 0) {
+            mSpinner.setOnItemSelectedListener(itemListener);
+        }
+
+    }
+
+    public void SaveBeacon(View view) {
+
+
+        if ((MainActivity.mBaseDevices.name.size() > 0) && (etX.length() > 0) &&
+                (etY.length() > 0) && (etZ.length() > 0)) {
+            MainActivity.mBaseBeacon.name.add(MainActivity.mBaseDevices.name.get(pos));
+            MainActivity.mBaseBeacon.address.add(MainActivity.mBaseDevices.address.get(pos));
+            MainActivity.mBaseBeacon.pos_x.add(new Integer(String.valueOf(etX.getText())));
+            MainActivity.mBaseBeacon.pos_y.add(new Integer(String.valueOf(etY.getText())));
+            MainActivity.mBaseBeacon.pos_z.add(new Integer(String.valueOf(etZ.getText())));
+            Toast.makeText(this,"Добавлен маяк: " + MainActivity.mBaseDevices.name.get(pos)+
+                            " : "+ MainActivity.mBaseDevices.address.get(pos) +
+                            " : " + MainActivity.mBaseBeacon.pos_x + "," +
+                            " : " + MainActivity.mBaseBeacon.pos_y + "," +
+                            " : " + MainActivity.mBaseBeacon.pos_z,
+                            Toast.LENGTH_LONG).show();
+            MainActivity.mBaseDevices.name.remove(pos);
+            MainActivity.mBaseDevices.address.remove(pos);
+            MainActivity.mBaseDevices.spinner_name.remove(pos);
+        }
+        else{
+            Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();
+        }
     }
 }
