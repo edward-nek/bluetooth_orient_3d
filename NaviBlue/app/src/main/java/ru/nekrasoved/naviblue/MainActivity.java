@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<BluetoothDevice> mDevices = new ArrayList<>();
     private ListView listDevices;
 
+    public static BaseDevices mBaseDevices = new BaseDevices();
+
     private DeviceListAdapter mDeviceListAdapter;
 
     @Override
@@ -47,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
         mDeviceListAdapter = new DeviceListAdapter(this, R.layout.device_item, mDevices);
 
+        // open Form add beacons
+
         Button btAddBeacon = (Button)findViewById(R.id.btAddBeacon);
 
         btAddBeacon.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +65,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
+        // open BeaconsList
+
+        Button btBeacons = (Button)findViewById(R.id.btBeacons);
+
+        btBeacons.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    Intent intent = new Intent(MainActivity.this, BeaconsList.class);
+                    startActivity(intent);
+                    finish();
+                }catch (Exception e){
+
+                }
+            }
+        });
+
     }
 
     public void checkBlue(View view) {
@@ -142,16 +166,22 @@ public class MainActivity extends AppCompatActivity {
             final String action = intent.getAction();
             if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)){
                 Toast.makeText(MainActivity.this, "Поиск начался", Toast.LENGTH_LONG).show();
+                mBaseDevices = new BaseDevices();
             }
             if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){
                 Toast.makeText(MainActivity.this, "Поиск завершен", Toast.LENGTH_LONG).show();
-
                 showListDevices();
             }
             if (action.equals(BluetoothDevice.ACTION_FOUND)){
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device != null){
                     if (!mDevices.contains(device)){
+                        //добавляем устройство в базу устройств
+                        mBaseDevices.address.add(device.getAddress());
+                        mBaseDevices.name.add(device.getName());
+
+                        mBaseDevices.spinner_name.add(device.getName() + " : " + device.getAddress()); //костыль
+
                         mDeviceListAdapter.add(device);
                     }
                 }
