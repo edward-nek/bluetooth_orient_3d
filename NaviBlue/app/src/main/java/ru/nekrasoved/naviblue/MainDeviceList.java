@@ -91,6 +91,12 @@ public class MainDeviceList extends AppCompatActivity{
             MainActivity.mBaseDevices.name.remove(pos);
             MainActivity.mBaseDevices.address.remove(pos);
             MainActivity.mBaseDevices.spinner_name.remove(pos);
+
+            //главное меню
+
+            Intent intent = new Intent(MainDeviceList.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         }
         else{
             Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();

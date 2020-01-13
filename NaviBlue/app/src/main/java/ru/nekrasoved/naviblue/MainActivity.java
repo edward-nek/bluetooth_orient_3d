@@ -181,9 +181,15 @@ public class MainActivity extends AppCompatActivity {
                     if (!mDevices.contains(device)){
                         //добавляем устройство в базу устройств
                         mBaseDevices.address.add(device.getAddress());
-                        mBaseDevices.name.add(device.getName());
 
-                        mBaseDevices.spinner_name.add(device.getName() + " : " + device.getAddress()); //костыль
+                        if (device.getName() == null){
+                            mBaseDevices.name.add("Not Name");
+                            mBaseDevices.spinner_name.add("Not Name : " + device.getAddress()); //костыль
+                        }
+                        else{
+                            mBaseDevices.name.add(device.getName());
+                            mBaseDevices.spinner_name.add(device.getName() + " : " + device.getAddress()); //костыль
+                        }
 
                         mDeviceListAdapter.add(device);
                     }
