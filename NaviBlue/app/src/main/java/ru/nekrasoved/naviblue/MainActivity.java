@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private DeviceListAdapter mDeviceListAdapter;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,22 +133,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (!bluetooth.isDiscovering()) {
             bluetooth.startDiscovery();
-
-            IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            registerReceiver(mReceiver, filter);
         }
 
         if (bluetooth.isDiscovering()) {
             bluetooth.cancelDiscovery();
             bluetooth.startDiscovery();
-
-            IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            registerReceiver(mReceiver, filter);
         }
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter);
 
 
     }
@@ -168,11 +164,17 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)){
-                Toast.makeText(MainActivity.this, "Поиск начался", Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.this, "Поиск начался", Toast.LENGTH_LONG).show();
+
+                mProgressDialog = ProgressDialog.show(MainActivity.this, "Поиск устройств", "Пожалуйста подождите");
+
                 mBaseDevices = new BaseDevices();
             }
             if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){
-                Toast.makeText(MainActivity.this, "Поиск завершен", Toast.LENGTH_LONG).show();
+
+                mProgressDialog.dismiss();
+
+                //Toast.makeText(MainActivity.this, "Поиск завершен", Toast.LENGTH_LONG).show();
                 showListDevices();
             }
             if (action.equals(BluetoothDevice.ACTION_FOUND)){
