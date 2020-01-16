@@ -37,16 +37,17 @@ public class BeaconsList extends AppCompatActivity {
             }
         });
 
-//         test = new ArrayList<String>();
-//
-//        for(int i = 1; i <= MainActivity.mBaseBeacon.name.size(); i++){
-//            test.set(i, MainActivity.mBaseBeacon.name.get(i) + " : "+ MainActivity.mBaseBeacon.address.get(i) + " X: "+
-//                    MainActivity.mBaseBeacon.pos_x.get(i)  + " Y: "+ MainActivity.mBaseBeacon.pos_y.get(i)  + " Z: "+
-//                    MainActivity.mBaseBeacon.pos_z.get(i));
-//        }
+        //костыль
+        test = new ArrayList<String>();
+
+        for(int i = 0; i < MainActivity.mBaseBeacon.name.size(); i++){
+            test.add(i, MainActivity.mBaseBeacon.name.get(i) + " : "+ MainActivity.mBaseBeacon.address.get(i) + " : X="+
+                    MainActivity.mBaseBeacon.pos_x.get(i)  + " : Y="+ MainActivity.mBaseBeacon.pos_y.get(i)  + " : Z="+
+                    MainActivity.mBaseBeacon.pos_z.get(i));
+        }
 
         // адаптер
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, MainActivity.mBaseBeacon.address);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, test);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         ListView list_beacon = (ListView) findViewById(R.id.list_beacon);

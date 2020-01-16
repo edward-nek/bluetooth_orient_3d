@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     //базы хранения данных о маячках
     public static BaseDevices mBaseDevices = new BaseDevices();
+
     public static BaseBeacon mBaseBeacon = new BaseBeacon();
 
 
