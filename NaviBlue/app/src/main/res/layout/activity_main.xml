@@ -10,52 +10,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/my_first_app"
+        android:textSize="30dp"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.3" />
 
-    <Button
-        android:layout_width="143dp"
-        android:layout_height="53dp"
-        android:onClick="checkBlue"
-        android:text="Check Bluetooth"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.43" />
-
-    <Button
-        android:id="@+id/status_blue"
-        android:layout_width="143dp"
-        android:layout_height="53dp"
-        android:onClick="onBlue"
-        android:text="Off"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35" />
 
     <Button
         android:id="@+id/btFindDevice"
-        android:layout_width="147dp"
-        android:layout_height="52dp"
+        android:layout_width="180dp"
+        android:layout_height="60dp"
         android:onClick="findDevice"
-        android:text="find Device"
+        android:text="Найти Маячки"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.51" />
+        app:layout_constraintVertical_bias="0.48" />
 
     <Button
         android:id="@+id/btAddBeacon"
-        android:layout_width="147dp"
-        android:layout_height="48dp"
-        android:text="Add Beacon"
+        android:layout_width="180dp"
+        android:layout_height="60dp"
+        android:text="Добавить маяки"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -64,13 +44,13 @@
 
     <Button
         android:id="@+id/btBeacons"
-        android:layout_width="147dp"
-        android:layout_height="48dp"
+        android:layout_width="180dp"
+        android:layout_height="60dp"
         android:text="Список маяков"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.65" />
+        app:layout_constraintVertical_bias="0.68" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

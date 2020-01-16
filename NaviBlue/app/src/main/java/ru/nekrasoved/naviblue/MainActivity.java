@@ -46,16 +46,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        statusButton = (Button) findViewById(R.id.status_blue);
+        //statusButton = (Button) findViewById(R.id.status_blue);
         bluetooth = BluetoothAdapter.getDefaultAdapter();
         if(bluetooth == null){
             Toast.makeText(this, "Ваше устройство не поддерживает bluetooth!", Toast.LENGTH_LONG).show();
             finish();
         }
 
-        if (bluetooth.isEnabled()) {
-                statusButton.setText("On");
-        }
+//        if (bluetooth.isEnabled()) {
+//                statusButton.setText("On");
+//        }
 
         mDeviceListAdapter = new DeviceListAdapter(this, R.layout.device_item, mDevices);
 
@@ -97,38 +97,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void checkBlue(View view) {
+//    public void checkBlue(View view) {
+//
+//        String status;
+//        if (bluetooth.isEnabled()) {
+//            String mydeviceaddress = bluetooth.getAddress();
+//            String mydevicename = bluetooth.getName();
+//            status = mydevicename + " : " + mydeviceaddress;
+//        }
+//        else {
+//            status = "Bluetooth отключен";
+//        }
+//        Toast.makeText(this, status, Toast.LENGTH_LONG).show();
+//
+//
+//    }
 
-        String status;
-        if (bluetooth.isEnabled()) {
-            String mydeviceaddress = bluetooth.getAddress();
-            String mydevicename = bluetooth.getName();
-            status = mydevicename + " : " + mydeviceaddress;
-        }
-        else {
-            status = "Bluetooth отключен";
-        }
-        Toast.makeText(this, status, Toast.LENGTH_LONG).show();
-
-
-    }
-
-    public void onBlue(View view) {
-        String status;
-        if (bluetooth.isEnabled()) {
-            bluetooth.disable();
-            status = "Bluetooth отключен";
-            Toast.makeText(this, status, Toast.LENGTH_LONG).show();
-            statusButton.setText("Off");
-        }
-        else{
-            bluetooth.enable();
-            status = "Bluetooth включен";
-            Toast.makeText(this, status, Toast.LENGTH_LONG).show();
-            statusButton.setText("On");
-        }
-
-    }
+//    public void onBlue(View view) {
+//        String status;
+//        if (bluetooth.isEnabled()) {
+//            bluetooth.disable();
+//            status = "Bluetooth отключен";
+//            Toast.makeText(this, status, Toast.LENGTH_LONG).show();
+//            statusButton.setText("Off");
+//        }
+//        else{
+//            bluetooth.enable();
+//            status = "Bluetooth включен";
+//            Toast.makeText(this, status, Toast.LENGTH_LONG).show();
+//            statusButton.setText("On");
+//        }
+//
+//    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void findDevice(View view) {
