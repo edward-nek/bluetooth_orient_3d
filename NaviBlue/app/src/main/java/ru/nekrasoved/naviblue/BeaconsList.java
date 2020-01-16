@@ -5,22 +5,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class BeaconsList extends AppCompatActivity {
 
     public ArrayList <String> test;
+
+    public Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beacons_list);
-
-        // open Form add beacons
 
         Button bt_Back = (Button)findViewById(R.id.bt_Back);
 
@@ -52,5 +55,59 @@ public class BeaconsList extends AppCompatActivity {
 
         ListView list_beacon = (ListView) findViewById(R.id.list_beacon);
         list_beacon.setAdapter(adapter);
+
+        list_beacon.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                MainActivity.filtrAddress = getAddress(position);
+                for (int i = 0; i < MainActivity.mBaseBeacon.name.size(); i++){
+                    if (MainActivity.mBaseBeacon.address.get(i).equals(MainActivity.filtrAddress)){
+                        MainActivity.filtrAddressId = i;
+                    }
+//                    System.out.println(MainActivity.mBaseBeacon.address.get(i) + " = " + MainActivity.filtrAddress);
+                }
+
+
+                //test
+
+//                Toast.makeText(BeaconsList.this, MainActivity.filtrAddressId + " " + MainActivity.filtrAddress, Toast.LENGTH_LONG).show();
+
+                intent = new Intent(BeaconsList.this, BeaconInfo.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    private String getAddress(int pos){
+//        System.out.println(test.get(pos));
+//        System.out.println(pos);
+        String str = test.get(pos);
+        boolean a = true;
+        int ind = 0;
+        while (a) {
+            if(str.charAt(ind) == ':'){
+                a = false;
+            }
+            else{
+                ind++;
+            }
+        }
+//        System.out.println(ind);
+        ind+=2;
+        a = true;
+        String address = "";
+        while (a){
+            if(str.charAt(ind) == ' '){
+                a = false;
+            }
+            else{
+                address += str.charAt(ind);
+                ind++;
+            }
+        }
+//        System.out.println(address);
+        return address;
     }
 }

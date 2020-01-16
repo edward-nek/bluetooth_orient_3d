@@ -37,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private DeviceListAdapter mDeviceListAdapter;
     private ProgressDialog mProgressDialog;
 
+    //переменная для фильтра расстояния для beacon = address
+    public  static String filtrAddress;
+    public  static Integer filtrAddressId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
