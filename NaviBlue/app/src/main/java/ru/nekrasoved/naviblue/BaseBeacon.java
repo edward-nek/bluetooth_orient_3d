@@ -2,6 +2,13 @@ package ru.nekrasoved.naviblue;
 
 import java.util.ArrayList;
 
+import android.content.Context;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import androidx.annotation.Nullable;
+
 public class BaseBeacon {
 
 //    public String name; //имя устройства

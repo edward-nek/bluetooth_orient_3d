@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+
     private Button statusButton;
     private BluetoothAdapter bluetooth;
     private ArrayList<BluetoothDevice> mDevices = new ArrayList<>();
