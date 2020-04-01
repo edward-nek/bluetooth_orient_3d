@@ -14,9 +14,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,6 +34,8 @@ public class BeaconInfo extends AppCompatActivity {
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
+    DBBeacon dbBeacon;
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,11 @@ public class BeaconInfo extends AppCompatActivity {
         setContentView(R.layout.activity_beacon_info);
 
         Button bt_Back = (Button)findViewById(R.id.bt_Back_info);
+
+        dbBeacon = new DBBeacon(this); //БД Маяков
+        dbBeacon.open();
+
+        Cursor cursor = dbBeacon.getAllData();
 
         bt_Back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,25 +63,63 @@ public class BeaconInfo extends AppCompatActivity {
             }
         });
 
-        //set name beacon
-        text = (TextView) findViewById(R.id.tvNameBeacon);
-        text.setText(MainActivity.mBaseBeacon.name.get(MainActivity.filtrAddressId));
+        if (cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndex(DBBeacon.KEY_ID);
+            int nameIndex = cursor.getColumnIndex(DBBeacon.KEY_NAME);
+            int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
+            int xIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_X);
+            int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
+            int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
 
-        //set address beacon
-        text = (TextView) findViewById(R.id.tvAddressBeacon);
-        text.setText(MainActivity.mBaseBeacon.address.get(MainActivity.filtrAddressId));
+            int i = 0;
 
-        //set X beacon
-        text = (TextView) findViewById(R.id.tvXBeacon);
-        text.setText("X = " + MainActivity.mBaseBeacon.pos_x.get(MainActivity.filtrAddressId));
+            do {
+                if (cursor.getInt(idIndex) == MainActivity.filtrAddressId + 1){
+                    //set name beacon
+                    text = (TextView) findViewById(R.id.tvNameBeacon);
+                    text.setText(cursor.getString(nameIndex));
 
-        //set Y beacon
-        text = (TextView) findViewById(R.id.tvYBeacon);
-        text.setText("Y = " + MainActivity.mBaseBeacon.pos_y.get(MainActivity.filtrAddressId));
 
-        //set Z beacon
-        text = (TextView) findViewById(R.id.tvZBeacon);
-        text.setText("Z = " + MainActivity.mBaseBeacon.pos_z.get(MainActivity.filtrAddressId));
+                    //set address beacon
+                    text = (TextView) findViewById(R.id.tvAddressBeacon);
+                    text.setText(cursor.getString(addressIndex));
+
+                    //set X beacon
+                    text = (TextView) findViewById(R.id.tvXBeacon);
+                    text.setText("X = " + cursor.getInt(xIndex));
+
+                    //set Y beacon
+                    text = (TextView) findViewById(R.id.tvYBeacon);
+                    text.setText("Y = " + cursor.getInt(yIndex));
+
+                    //set Z beacon
+                    text = (TextView) findViewById(R.id.tvZBeacon);
+                    text.setText("Z = " + cursor.getInt(zIndex));
+                }
+            } while (cursor.moveToNext());
+        }
+
+
+//        //set name beacon
+//        text = (TextView) findViewById(R.id.tvNameBeacon);
+//        text.setText(MainActivity.mBaseBeacon.name.get(MainActivity.filtrAddressId));
+//
+//
+//        //set address beacon
+//        text = (TextView) findViewById(R.id.tvAddressBeacon);
+//        text.setText(MainActivity.mBaseBeacon.address.get(MainActivity.filtrAddressId));
+//
+//        //set X beacon
+//        text = (TextView) findViewById(R.id.tvXBeacon);
+//        text.setText("X = " + MainActivity.mBaseBeacon.pos_x.get(MainActivity.filtrAddressId));
+//
+//        //set Y beacon
+//        text = (TextView) findViewById(R.id.tvYBeacon);
+//        text.setText("Y = " + MainActivity.mBaseBeacon.pos_y.get(MainActivity.filtrAddressId));
+//
+//        //set Z beacon
+//        text = (TextView) findViewById(R.id.tvZBeacon);
+//        text.setText("Z = " + MainActivity.mBaseBeacon.pos_z.get(MainActivity.filtrAddressId));
 
         //scanning beacon
 //        AsyncTask.execute(new Runnable() {

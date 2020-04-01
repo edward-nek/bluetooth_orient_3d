@@ -9,11 +9,13 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
 
 import android.bluetooth.*;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     //базы хранения данных о маячках
     public static BaseDevices mBaseDevices = new BaseDevices();
 
-    public static BaseBeacon mBaseBeacon = new BaseBeacon();
+    //public static BaseBeacon mBaseBeacon = new BaseBeacon();
 
 
     private DeviceListAdapter mDeviceListAdapter;
@@ -42,10 +44,15 @@ public class MainActivity extends AppCompatActivity {
     public  static String filtrAddress;
     public  static Integer filtrAddressId;
 
+    DBBeacon dbBeacon;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dbBeacon = new DBBeacon(this); //БД Маяков
+        dbBeacon.open();
 
         //statusButton = (Button) findViewById(R.id.status_blue);
         bluetooth = BluetoothAdapter.getDefaultAdapter();
@@ -132,8 +139,12 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void findDevice(View view) {
+    public void findDevice(View view) throws InterruptedException {
+
         bluetooth.enable();
+
+        Thread.sleep(400); //для того, чтобы успел включиться блютуз, пауза
+
 
         checkPermissionLocation();
 
@@ -187,24 +198,43 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device != null){
                     if (!mDevices.contains(device)){
+
                         //добавляем устройство в базу устройств
-                        mBaseDevices.address.add(device.getAddress());
+                        if (checkCopy(device.getAddress())) {
+                            mBaseDevices.address.add(device.getAddress());
 
-                        if (device.getName() == null){
-                            mBaseDevices.name.add("Not Name");
-                            mBaseDevices.spinner_name.add("Not Name : " + device.getAddress()); //костыль
-                        }
-                        else{
-                            mBaseDevices.name.add(device.getName());
-                            mBaseDevices.spinner_name.add(device.getName() + " : " + device.getAddress()); //костыль
-                        }
+                            if (device.getName() == null) {
+                                mBaseDevices.name.add("Not Name");
+                                mBaseDevices.spinner_name.add("Not Name : " + device.getAddress()); //костыль
+                            } else {
+                                mBaseDevices.name.add(device.getName());
+                                mBaseDevices.spinner_name.add(device.getName() + " : " + device.getAddress()); //костыль
+                            }
 
-                        mDeviceListAdapter.add(device);
+                            mDeviceListAdapter.add(device);
+                        }
                     }
                 }
             }
         }
     };
+
+    //проверка на копии
+
+    private Boolean checkCopy(String address) {
+        Boolean check = true;
+        Cursor cursor = dbBeacon.getAllData();
+
+        if (cursor.moveToFirst()) {
+            int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
+            do {
+               if (cursor.getString(addressIndex).equals(address)){
+                   check = false;
+               }
+            } while (cursor.moveToNext());
+        }
+        return check;
+    }
 
     private void showListDevices() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

@@ -113,24 +113,15 @@ public class MainDeviceList extends AppCompatActivity{
 
             //добавление данных в БД SQLite
 
-            SQLiteDatabase database = dbBeacon.getWritableDatabase(); //открытие БД для записи и чтения
+            dbBeacon.open(); //открытие БД для записи и чтения
 
             ContentValues contentValues = new ContentValues();
 
-            //Добавить
-            contentValues.put(DBBeacon.KEY_NAME, nameBeacon);
-            contentValues.put(DBBeacon.KEY_ADDRESS, addressBeacon);
-            contentValues.put(DBBeacon.KEY_POS_X, posXbeacon);
-            contentValues.put(DBBeacon.KEY_POS_Y, posYbeacon);
-            contentValues.put(DBBeacon.KEY_POS_Z, posZbeacon);
-
-            database.insert(DBBeacon.TABLE_BEACONS, null, contentValues);
-            //Конец добавить
-
+            dbBeacon.addRec(nameBeacon, addressBeacon, posXbeacon, posYbeacon, posZbeacon);
 
             //Вывод логов о добавлении в консоль
 
-            Cursor cursor = database.query(DBBeacon.TABLE_BEACONS, null, null, null, null, null, null);
+            Cursor cursor = dbBeacon.getAllData();
 
             if (cursor.moveToFirst()) {
                 int idIndex = cursor.getColumnIndex(DBBeacon.KEY_ID);
@@ -152,6 +143,12 @@ public class MainDeviceList extends AppCompatActivity{
             else {
                 Log.d("mLog", "0 rows");
             }
+
+            //удаление выбранного маяка из списка выбора
+
+            MainActivity.mBaseDevices.name.remove(pos);
+            MainActivity.mBaseDevices.address.remove(pos);
+            MainActivity.mBaseDevices.spinner_name.remove(pos);
             //главное меню
 
             Intent intent = new Intent(MainDeviceList.this, MainActivity.class);

@@ -2,12 +2,18 @@ package ru.nekrasoved.naviblue;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -20,12 +26,20 @@ public class BeaconsList extends AppCompatActivity {
 
     public Intent intent;
 
+    DBBeacon dbBeacon;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beacons_list);
 
         Button bt_Back = (Button)findViewById(R.id.bt_Back);
+
+        dbBeacon = new DBBeacon(this); //БД Маяков
+        dbBeacon.open();
+
+        Cursor cursor = dbBeacon.getAllData();
 
         bt_Back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,11 +57,34 @@ public class BeaconsList extends AppCompatActivity {
         //костыль
         test = new ArrayList<String>();
 
-        for(int i = 0; i < MainActivity.mBaseBeacon.name.size(); i++){
-            test.add(i, MainActivity.mBaseBeacon.name.get(i) + " : "+ MainActivity.mBaseBeacon.address.get(i) + " : X="+
-                    MainActivity.mBaseBeacon.pos_x.get(i)  + " : Y="+ MainActivity.mBaseBeacon.pos_y.get(i)  + " : Z="+
-                    MainActivity.mBaseBeacon.pos_z.get(i));
+//        for(int i = 0; i < cursor.getCount(); i++){
+//            test.add(i, MainActivity.mBaseBeacon.name.get(i) + " : "+ MainActivity.mBaseBeacon.address.get(i) + " : X="+
+//                    MainActivity.mBaseBeacon.pos_x.get(i)  + " : Y="+ MainActivity.mBaseBeacon.pos_y.get(i)  + " : Z="+
+//                    MainActivity.mBaseBeacon.pos_z.get(i));
+//        }
+
+
+        if (cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndex(DBBeacon.KEY_ID);
+            int nameIndex = cursor.getColumnIndex(DBBeacon.KEY_NAME);
+            int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
+            int xIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_X);
+            int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
+            int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
+
+            int i = 0;
+
+            do {
+                test.add(i,  cursor.getString(nameIndex) +
+                        " : " + cursor.getString(addressIndex) +
+                        " : X =" + cursor.getInt(xIndex) +
+                        " : Y =" + cursor.getInt(yIndex) +
+                        " : Z =" + cursor.getInt(zIndex));
+
+                i ++;
+            } while (cursor.moveToNext());
         }
+
 
         // адаптер
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, test);
@@ -60,12 +97,28 @@ public class BeaconsList extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+//                MainActivity.filtrAddress = getAddress(position);
+//                for (int i = 0; i < MainActivity.mBaseBeacon.name.size(); i++){
+//                    if (MainActivity.mBaseBeacon.address.get(i).equals(MainActivity.filtrAddress)){
+//                        MainActivity.filtrAddressId = i;
+//                    }
+////                    System.out.println(MainActivity.mBaseBeacon.address.get(i) + " = " + MainActivity.filtrAddress);
+//                }
+
                 MainActivity.filtrAddress = getAddress(position);
-                for (int i = 0; i < MainActivity.mBaseBeacon.name.size(); i++){
-                    if (MainActivity.mBaseBeacon.address.get(i).equals(MainActivity.filtrAddress)){
-                        MainActivity.filtrAddressId = i;
-                    }
-//                    System.out.println(MainActivity.mBaseBeacon.address.get(i) + " = " + MainActivity.filtrAddress);
+                Cursor cursor = dbBeacon.getAllData();
+
+                if (cursor.moveToFirst()) {
+                    int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
+
+                    int i = 0;
+
+                    do {
+                        if (cursor.getString(addressIndex).equals(MainActivity.filtrAddress)){
+                            MainActivity.filtrAddressId = i;
+                        }
+                        i ++;
+                    } while (cursor.moveToNext());
                 }
 
 
