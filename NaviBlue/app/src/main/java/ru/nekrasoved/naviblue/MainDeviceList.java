@@ -47,6 +47,7 @@ public class MainDeviceList extends AppCompatActivity{
                 try{
                     Intent intent = new Intent(MainDeviceList.this, MainActivity.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 
@@ -153,6 +154,7 @@ public class MainDeviceList extends AppCompatActivity{
 
             Intent intent = new Intent(MainDeviceList.this, MainActivity.class);
             startActivity(intent);
+            overridePendingTransition(0, 0);
             finish();
         }
         else{

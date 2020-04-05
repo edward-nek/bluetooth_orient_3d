@@ -47,6 +47,7 @@ public class BeaconsList extends AppCompatActivity {
                 try{
                     Intent intent = new Intent(BeaconsList.this, MainActivity.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 
@@ -123,6 +124,7 @@ public class BeaconsList extends AppCompatActivity {
 
                 intent = new Intent(BeaconsList.this, BeaconInfo.class);
                 startActivity(intent);
+                overridePendingTransition(0, 0);
                 finish();
             }
         });

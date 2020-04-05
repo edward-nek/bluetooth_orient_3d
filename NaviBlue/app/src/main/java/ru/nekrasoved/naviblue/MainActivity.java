@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     Intent intent = new Intent(MainActivity.this, MainDeviceList.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     Intent intent = new Intent(MainActivity.this, BeaconsList.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 
@@ -113,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     Intent intent = new Intent(MainActivity.this, PositionActivity.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 

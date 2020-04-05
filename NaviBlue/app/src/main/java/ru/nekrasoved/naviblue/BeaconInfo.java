@@ -56,6 +56,7 @@ public class BeaconInfo extends AppCompatActivity {
                     Intent intent = new Intent(BeaconInfo.this, BeaconsList.class);
                     stopScanning();
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 
@@ -75,6 +76,7 @@ public class BeaconInfo extends AppCompatActivity {
                     Intent intent = new Intent(BeaconInfo.this, BeaconsList.class);
                     stopScanning();
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 

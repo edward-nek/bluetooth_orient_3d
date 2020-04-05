@@ -98,6 +98,7 @@ public class PositionActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(PositionActivity.this, MainActivity.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);
                     finish();
                 }catch (Exception e){
 
