@@ -111,27 +111,46 @@ public class DBBeacon{
                             "INNER JOIN " + TABLE_SIGNAL + " AS s " +
                             "ON b." + KEY_ADDRESS + " = " +
                             "s." + KEY_BEACON_ADDRESS + " " +
+                            "WHERE b." + KEY_ADDRESS + " = " + '"'+address + '"' + " " +
                             "ORDER BY " + "s." + KEY_SIGNAL_ID + " DESC "+
                             "LIMIT " + limit + ";";
         Cursor c = null;
 
-        Log.d("Logm", "SQL1");
+//        Log.d("Logm", "SQL1");
 
         c = database.rawQuery(sqlQuery, null);
-        Log.d("Logm", "SQL2");
+//        Log.d("Logm", "SQL2");
         double rssiSignal = 0; //уровень сигнала
-        Log.d("Logm", "SQL3");
+//        Log.d("Logm", "SQL3");
         if (c.moveToFirst()){
             int rssiIndex = c.getColumnIndex("rssi");
-            Log.d("Logm", "rssi = " + rssiIndex);
+//            Log.d("Logm", "rssi = " + rssiIndex);
             do {
                 rssiSignal = rssiSignal + c.getInt(rssiIndex);
             } while (c.moveToNext());
         }
-        Log.d("Logm", "SQL4");
+//        Log.d("Logm", "SQL4");
         rssiSignal = rssiSignal / c.getCount();
-        Log.d("Logm", "SQL5");
+//        Log.d("Logm", "SQL5");
         return rssiSignal;
+    }
+
+    //получить список действующих маяков
+    public Cursor beaconList(int limit) {
+        String sqlQuery = "SELECT b.name AS name, b.address AS address " +
+                "FROM " + TABLE_BEACONS + " AS b " +
+                "INNER JOIN " + TABLE_SIGNAL + " AS s " +
+                "ON b." + KEY_ADDRESS + " = " +
+                "s." + KEY_BEACON_ADDRESS + " " + "GROUP BY "+ "b.address "+
+                "ORDER BY " + "s." + KEY_SIGNAL_RSSI + " DESC "+
+                "LIMIT " + limit + ";";
+        Cursor c = null;
+
+//        Log.d("Logm", "SQL1");
+
+        c = database.rawQuery(sqlQuery, null);
+//        Log.d("Logm", "SQL2");
+        return c;
     }
 
     //очистить таблицу

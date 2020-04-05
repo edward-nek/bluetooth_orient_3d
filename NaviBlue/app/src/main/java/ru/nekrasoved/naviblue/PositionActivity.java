@@ -21,11 +21,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class PositionActivity extends AppCompatActivity {
 
@@ -44,6 +47,13 @@ public class PositionActivity extends AppCompatActivity {
     EditText etCount;
 
     DBBeacon dbBeacon; //База данных маячков
+
+    Integer filtr;
+    Integer count;
+
+    Integer countBeacon; //количество видимых маяков
+
+    public static ArrayList <String> filtrBeacons; //фильтрация маячков с расстоянием для вывода
 
 
 
@@ -70,7 +80,7 @@ public class PositionActivity extends AppCompatActivity {
                     Cursor cursor;
                     dbBeacon.open();
                     cursor = dbBeacon.getAllDataSignal();
-                    Log.d("Logm", "--------BY-------");
+
                     if (cursor.moveToFirst()) {
                         int idIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_ID);
                         int signalIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_RSSI);
@@ -144,25 +154,15 @@ public class PositionActivity extends AppCompatActivity {
 
     public void filtr() {
 
+        stopScanning();
+        countBeacon = 0;
         if ((etFiltr.getText().toString().length() > 0)&&(etCount.getText().toString().length() > 0)){
             startScanning();
             dbBeacon.open();
-            Integer Filtr = new Integer(etFiltr.getText().toString()); //введенное количество маяков для фильтра
-            Integer Count = new Integer(etCount.getText().toString()); //введенное количество измерений для фильтра
-
-            Cursor cursor = null; //вывод
-
-
-            //переменные для query
-            String[] columns = null;
-            String selection = null;
-            String[] selectionArgs = null;
-            String groupBy = null;
-            String having = null;
-            String orderBy = null;
+            filtr = new Integer(etFiltr.getText().toString()); //введенное количество маяков для фильтра
+            count = new Integer(etCount.getText().toString()); //введенное количество измерений для фильтра
 
             //dbBeacon.query(DBBeacon.TABLE_BEACONS, null, );
-            Log.d("Logm", " " + dbBeacon.beaconSignal("7C:20:0A:BD:40:91", Count));
         }
         else{
             Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();
@@ -194,6 +194,9 @@ public class PositionActivity extends AppCompatActivity {
                 dbBeacon.addRecSignal(result.getDevice().getAddress(), result.getRssi());
 //                Log.d("Logm",result.getDevice().getAddress() +" : "+ result.getRssi());
             }
+
+            //отображаем маяки
+            showBeacons();
         }
     };
 
@@ -240,5 +243,38 @@ public class PositionActivity extends AppCompatActivity {
                 btScanner.stopScan(leScanCallback);
             }
         });
+    }
+
+    public void showBeacons() {
+        dbBeacon.open();
+        Cursor cursor = dbBeacon.beaconList(filtr);
+
+        if (countBeacon > count){
+            countBeacon = 0;
+            filtrBeacons = new ArrayList<String>();
+
+            if (cursor.moveToFirst()){
+                int nameIndex = cursor.getColumnIndex(DBBeacon.KEY_NAME);
+                int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
+                do {
+                    double rssi = dbBeacon.beaconSignal(cursor.getString(addressIndex), count);
+                    Log.d("Logm", cursor.getString(nameIndex) + " :: " + cursor.getString(addressIndex) +
+                            " : " + rssi);
+                    filtrBeacons.add(cursor.getString(nameIndex) + " :: " + cursor.getString(addressIndex) +
+                            " : rssi = " + rssi);
+
+                    // адаптер
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, filtrBeacons);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                    ListView list_beacon = (ListView) findViewById(R.id.list_pos_beacon);
+                    list_beacon.setAdapter(adapter);
+
+                } while (cursor.moveToNext());
+            }
+        }
+        else {
+            countBeacon ++;
+        }
     }
 }
