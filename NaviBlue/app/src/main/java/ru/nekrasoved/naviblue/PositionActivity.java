@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -99,6 +100,11 @@ public class PositionActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try{
+                    //скрыть клавиатуру по нажатию кнопки
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(btFiltr.getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+
                     filtr();
                 }catch (Exception e){
 
