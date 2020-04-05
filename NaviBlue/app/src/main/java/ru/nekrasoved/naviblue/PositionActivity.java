@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PositionActivity extends AppCompatActivity {
 
@@ -39,6 +40,7 @@ public class PositionActivity extends AppCompatActivity {
     Button btFiltr; //кнопка фильтра по кол-ву маяков
 
     EditText etFiltr;
+    EditText etCount;
 
     DBBeacon dbBeacon; //База данных маячков
 
@@ -105,6 +107,7 @@ public class PositionActivity extends AppCompatActivity {
         });
 
         etFiltr = (EditText) findViewById(R.id.et_pos_Filtr);
+        etCount = (EditText) findViewById(R.id.et_pos_Count);
 
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
@@ -131,32 +134,33 @@ public class PositionActivity extends AppCompatActivity {
             builder.show();
         }
 
-        startScanning();
-        //onClick(btFiltr);
     }
 
     public void filtr() {
 
-        stopScanning();
-        dbBeacon.open();
-        Integer Filtr = new Integer(etFiltr.getText().toString()); //введенное количество маяков для фильтра
+        if ((etFiltr.getText().toString().length() > 0)&&(etCount.getText().toString().length() > 0)){
+            startScanning();
+            dbBeacon.open();
+            Integer Filtr = new Integer(etFiltr.getText().toString()); //введенное количество маяков для фильтра
+            Integer Count = new Integer(etCount.getText().toString()); //введенное количество измерений для фильтра
 
-        Cursor cursor = null; //вывод
-
-
-        //переменные для query
-        String[] columns = null;
-        String selection = null;
-        String[] selectionArgs = null;
-        String groupBy = null;
-        String having = null;
-        String orderBy = null;
-
-        //dbBeacon.query(DBBeacon.TABLE_BEACONS, null, );
-        Log.d("Logm", " " + dbBeacon.beaconSignal("7C:20:0A:BD:40:91", Filtr));
+            Cursor cursor = null; //вывод
 
 
+            //переменные для query
+            String[] columns = null;
+            String selection = null;
+            String[] selectionArgs = null;
+            String groupBy = null;
+            String having = null;
+            String orderBy = null;
 
+            //dbBeacon.query(DBBeacon.TABLE_BEACONS, null, );
+            Log.d("Logm", " " + dbBeacon.beaconSignal("7C:20:0A:BD:40:91", Count));
+        }
+        else{
+            Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();
+        }
     }
 
     // Device scan callback.

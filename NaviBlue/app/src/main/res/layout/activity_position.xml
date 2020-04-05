@@ -55,6 +55,19 @@
         app:layout_constraintVertical_bias="0.58"
         app:layout_constraintHorizontal_bias="0.08"/>
 
+    <TextView
+        android:id="@+id/tv_pos2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Кол-во измерений:"
+        android:textSize="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65"
+        app:layout_constraintHorizontal_bias="0.01"/>
+
     <EditText
         android:id="@+id/et_pos_Filtr"
         android:layout_width="95dp"
@@ -67,7 +80,21 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.58"
-        app:layout_constraintHorizontal_bias="0.5"/>
+        app:layout_constraintHorizontal_bias="0.55"/>
+
+    <EditText
+        android:id="@+id/et_pos_Count"
+        android:layout_width="95dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:inputType="number"
+        android:maxLength="4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65"
+        app:layout_constraintHorizontal_bias="0.55"/>
 
     <Button
         android:id="@+id/bt_pos_Filtr"
@@ -78,7 +105,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.58"
+        app:layout_constraintVertical_bias="0.63"
         app:layout_constraintHorizontal_bias="0.85"/>
 
     <TextView
@@ -91,20 +118,20 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.68"
+        app:layout_constraintVertical_bias="0.74"
         app:layout_constraintHorizontal_bias="0.5"/>
 
     <TextView
         android:id="@+id/tv_pos_Coordinate"
         android:layout_width="213dp"
         android:layout_height="107dp"
-        android:text="TextView"
+        android:text=""
         android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.85"
+        app:layout_constraintVertical_bias="0.89"
         app:layout_constraintHorizontal_bias="0.5"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
