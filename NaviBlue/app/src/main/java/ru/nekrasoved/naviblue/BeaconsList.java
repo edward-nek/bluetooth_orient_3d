@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class BeaconsList extends AppCompatActivity {
 
-    public ArrayList <String> test;
+    public static ArrayList <String> test;
 
     public Intent intent;
 
@@ -72,16 +72,13 @@ public class BeaconsList extends AppCompatActivity {
             int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
             int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
 
-            int i = 0;
-
             do {
-                test.add(i,  cursor.getString(nameIndex) +
+                test.add(idIndex,  cursor.getString(nameIndex) +
                         " : " + cursor.getString(addressIndex) +
                         " : X =" + cursor.getInt(xIndex) +
                         " : Y =" + cursor.getInt(yIndex) +
                         " : Z =" + cursor.getInt(zIndex));
 
-                i ++;
             } while (cursor.moveToNext());
         }
 
@@ -109,15 +106,13 @@ public class BeaconsList extends AppCompatActivity {
                 Cursor cursor = dbBeacon.getAllData();
 
                 if (cursor.moveToFirst()) {
+                    int idIndex = cursor.getColumnIndex(DBBeacon.KEY_ID);
                     int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
-
-                    int i = 0;
 
                     do {
                         if (cursor.getString(addressIndex).equals(MainActivity.filtrAddress)){
-                            MainActivity.filtrAddressId = i;
+                            MainActivity.filtrAddressId = cursor.getInt(idIndex);
                         }
-                        i ++;
                     } while (cursor.moveToNext());
                 }
 

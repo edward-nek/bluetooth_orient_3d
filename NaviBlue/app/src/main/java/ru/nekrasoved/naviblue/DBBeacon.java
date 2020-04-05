@@ -5,12 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 public class DBBeacon{
 
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 8;
     public static final String  DATABASE_NAME = "beaconDb";
     public static final String  TABLE_BEACONS = "beacons";
 
@@ -22,9 +24,20 @@ public class DBBeacon{
     public static final String  KEY_POS_Z = "posZ";
 
     private static final String DB_CREATE =
-            "create table " + TABLE_BEACONS + " (" + KEY_ID + " integer primary key," +
+            "create table " + TABLE_BEACONS + " (" + KEY_ID + " integer primary key autoincrement," +
                     KEY_NAME + " text," + KEY_ADDRESS + " text," + KEY_POS_X + " integer," +
                     KEY_POS_Y + " integer," + KEY_POS_Z + " integer" + ");";
+
+    //таблица измерения сигнала маячков
+    public static final String TABLE_SIGNAL = "signal";
+
+    public static final String  KEY_SIGNAL_ID = "_id";
+    public static final String  KEY_BEACON_ADDRESS = "address";
+    public static final String  KEY_SIGNAL_RSSI = "rssi";
+
+    private static final String DB_SIGNAL_CREATE =
+            "create table " + TABLE_SIGNAL + " (" + KEY_SIGNAL_ID + " integer primary key," +
+                    KEY_BEACON_ADDRESS + " text," + KEY_SIGNAL_RSSI + " integer" + ");";
 
     private final Context cont;
 
@@ -52,6 +65,10 @@ public class DBBeacon{
         return database.query(TABLE_BEACONS, null, null, null, null, null, null);
     }
 
+    public Cursor getAllDataSignal() {
+        return database.query(TABLE_SIGNAL, null, null, null, null, null, null);
+    }
+
     // добавить запись в DB_TABLE
     public void addRec(String name, String address, Integer x, Integer y, Integer z) {
         ContentValues cv = new ContentValues();
@@ -64,14 +81,68 @@ public class DBBeacon{
         database.insert(TABLE_BEACONS, null, cv);
     }
 
+    public void addRecSignal(String address, Integer rssi) {
+        ContentValues cv = new ContentValues();
+        cv.put(KEY_BEACON_ADDRESS, address);
+        cv.put(KEY_SIGNAL_RSSI, rssi);
+
+        database.insert(TABLE_SIGNAL, null, cv);
+    }
+
     // удалить запись из DB_TABLE
     public void delRec(long id) {
         database.delete(TABLE_BEACONS, KEY_ID + " = " + id, null);
     }
 
+    public void delRecSignal(long id) {
+        database.delete(TABLE_SIGNAL, KEY_ID + " = " + id, null);
+    }
+
+    // запрос в БД
+    public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy,
+                        String having, String orderBy) {
+        return database.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+    }
+
+    //получить средний сигнал маячка по N записей
+    public double beaconSignal(String address, int limit) {
+        String sqlQuery = "SELECT s.rssi AS rssi " +
+                            "FROM " + TABLE_BEACONS + " AS b " +
+                            "INNER JOIN " + TABLE_SIGNAL + " AS s " +
+                            "ON b." + KEY_ADDRESS + " = " +
+                            "s." + KEY_BEACON_ADDRESS + " " +
+                            "ORDER BY " + "s." + KEY_SIGNAL_ID + " DESC "+
+                            "LIMIT " + limit + ";";
+        Cursor c = null;
+
+        Log.d("Logm", "SQL1");
+
+        c = database.rawQuery(sqlQuery, null);
+        Log.d("Logm", "SQL2");
+        double rssiSignal = 0; //уровень сигнала
+        Log.d("Logm", "SQL3");
+        if (c.moveToFirst()){
+            int rssiIndex = c.getColumnIndex("rssi");
+            Log.d("Logm", "rssi = " + rssiIndex);
+            do {
+                rssiSignal = rssiSignal + c.getInt(rssiIndex);
+            } while (c.moveToNext());
+        }
+        Log.d("Logm", "SQL4");
+        rssiSignal = rssiSignal / c.getCount();
+        Log.d("Logm", "SQL5");
+        return rssiSignal;
+    }
+
+    //очистить таблицу
+    public void clearSignalTable() {
+        database.execSQL("drop table if exists " + TABLE_SIGNAL);
+        database.execSQL(DB_SIGNAL_CREATE);
+    }
+
 
     // класс по созданию и управлению БД
-    private class DBHelper extends SQLiteOpenHelper {
+    class DBHelper extends SQLiteOpenHelper {
 
         public DBHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
@@ -80,12 +151,14 @@ public class DBBeacon{
         // создаем и заполняем БД
         @Override
         public void onCreate(SQLiteDatabase db) {
+            db.execSQL(DB_SIGNAL_CREATE);
             db.execSQL(DB_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("drop table if exists " + TABLE_BEACONS);
+            db.execSQL("drop table if exists " + TABLE_SIGNAL);
             onCreate(db);
         }
     }

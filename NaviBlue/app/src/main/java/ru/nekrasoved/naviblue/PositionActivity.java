@@ -15,18 +15,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
-public class BeaconInfo extends AppCompatActivity {
+public class PositionActivity extends AppCompatActivity {
 
-    TextView text;
+    ListView listBeacon;
 
     BluetoothManager btManager;
     BluetoothAdapter btAdapter;
@@ -34,27 +35,55 @@ public class BeaconInfo extends AppCompatActivity {
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
-    DBBeacon dbBeacon;
+    Button btBack; //кнопка назад
+    Button btFiltr; //кнопка фильтра по кол-ву маяков
+
+    EditText etFiltr;
+
+    DBBeacon dbBeacon; //База данных маячков
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_beacon_info);
+        setContentView(R.layout.activity_position);
 
-        dbBeacon = new DBBeacon(this); //БД Маяков
+        dbBeacon = new DBBeacon(this);
         dbBeacon.open();
+        dbBeacon.clearSignalTable();
+        dbBeacon.close();
 
-        final Cursor cursor = dbBeacon.getAllData();
-
-        Button bt_Back = (Button)findViewById(R.id.bt_Back_info);
-
-        bt_Back.setOnClickListener(new View.OnClickListener() {
+        btBack = (Button) findViewById(R.id.bt_pos_Back);
+        btBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try{
-                    Intent intent = new Intent(BeaconInfo.this, BeaconsList.class);
                     stopScanning();
+
+                    //вывод добавленных сигналов
+                    Cursor cursor;
+                    dbBeacon.open();
+                    cursor = dbBeacon.getAllDataSignal();
+                    Log.d("Logm", "--------BY-------");
+                    if (cursor.moveToFirst()) {
+                        int idIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_ID);
+                        int signalIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_RSSI);
+                        int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_BEACON_ADDRESS);
+                        do {
+                            String s;
+                            s = "id = "+ cursor.getString(idIndex) + " : rssi = " + cursor.getString(signalIndex) +
+                                    " : address = " + cursor.getString(addressIndex) + " ;";
+                            Log.d("Logm", s);
+
+                        } while (cursor.moveToNext());
+                    }
+                    dbBeacon.close();
+
+
+                    Intent intent = new Intent(PositionActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 }catch (Exception e){
@@ -63,91 +92,20 @@ public class BeaconInfo extends AppCompatActivity {
             }
         });
 
-        //удаление данных о маячке из БД
-
-        Button bt_Delete = (Button)findViewById(R.id.bt_deleteBeacon);
-        bt_Delete.setOnClickListener(new View.OnClickListener() {
+        btFiltr = (Button) findViewById(R.id.bt_pos_Filtr);
+        btFiltr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try{
-                    dbBeacon.delRec(MainActivity.filtrAddressId);
-
-                    Intent intent = new Intent(BeaconInfo.this, BeaconsList.class);
-                    stopScanning();
-                    startActivity(intent);
-                    finish();
+                    filtr();
                 }catch (Exception e){
 
                 }
             }
         });
 
-        if (cursor.moveToFirst()) {
-            int idIndex = cursor.getColumnIndex(DBBeacon.KEY_ID);
-            int nameIndex = cursor.getColumnIndex(DBBeacon.KEY_NAME);
-            int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
-            int xIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_X);
-            int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
-            int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
+        etFiltr = (EditText) findViewById(R.id.et_pos_Filtr);
 
-            int i = 0;
-
-            do {
-                if (cursor.getInt(idIndex) == MainActivity.filtrAddressId){
-                    //set name beacon
-                    text = (TextView) findViewById(R.id.tvNameBeacon);
-                    text.setText(cursor.getString(nameIndex));
-
-
-                    //set address beacon
-                    text = (TextView) findViewById(R.id.tvAddressBeacon);
-                    text.setText(cursor.getString(addressIndex));
-
-                    //set X beacon
-                    text = (TextView) findViewById(R.id.tvXBeacon);
-                    text.setText("X = " + cursor.getInt(xIndex));
-
-                    //set Y beacon
-                    text = (TextView) findViewById(R.id.tvYBeacon);
-                    text.setText("Y = " + cursor.getInt(yIndex));
-
-                    //set Z beacon
-                    text = (TextView) findViewById(R.id.tvZBeacon);
-                    text.setText("Z = " + cursor.getInt(zIndex));
-                }
-            } while (cursor.moveToNext());
-        }
-
-
-//        //set name beacon
-//        text = (TextView) findViewById(R.id.tvNameBeacon);
-//        text.setText(MainActivity.mBaseBeacon.name.get(MainActivity.filtrAddressId));
-//
-//
-//        //set address beacon
-//        text = (TextView) findViewById(R.id.tvAddressBeacon);
-//        text.setText(MainActivity.mBaseBeacon.address.get(MainActivity.filtrAddressId));
-//
-//        //set X beacon
-//        text = (TextView) findViewById(R.id.tvXBeacon);
-//        text.setText("X = " + MainActivity.mBaseBeacon.pos_x.get(MainActivity.filtrAddressId));
-//
-//        //set Y beacon
-//        text = (TextView) findViewById(R.id.tvYBeacon);
-//        text.setText("Y = " + MainActivity.mBaseBeacon.pos_y.get(MainActivity.filtrAddressId));
-//
-//        //set Z beacon
-//        text = (TextView) findViewById(R.id.tvZBeacon);
-//        text.setText("Z = " + MainActivity.mBaseBeacon.pos_z.get(MainActivity.filtrAddressId));
-
-        //scanning beacon
-//        AsyncTask.execute(new Runnable() {
-//            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-//            @Override
-//            public void run() {
-//                btScanner.startScan();
-//            }
-//        });
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
         btScanner = btAdapter.getBluetoothLeScanner();
@@ -174,17 +132,57 @@ public class BeaconInfo extends AppCompatActivity {
         }
 
         startScanning();
+        //onClick(btFiltr);
     }
 
+    public void filtr() {
+
+        stopScanning();
+        dbBeacon.open();
+        Integer Filtr = new Integer(etFiltr.getText().toString()); //введенное количество маяков для фильтра
+
+        Cursor cursor = null; //вывод
+
+
+        //переменные для query
+        String[] columns = null;
+        String selection = null;
+        String[] selectionArgs = null;
+        String groupBy = null;
+        String having = null;
+        String orderBy = null;
+
+        //dbBeacon.query(DBBeacon.TABLE_BEACONS, null, );
+        Log.d("Logm", " " + dbBeacon.beaconSignal("7C:20:0A:BD:40:91", Filtr));
+
+
+
+    }
 
     // Device scan callback.
     private ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            //set Rssi beacon
-            if (result.getDevice().getAddress().equals(MainActivity.filtrAddress)){
-                text = (TextView) findViewById(R.id.tvRssiBeacon);
-                text.setText("rssi = " + result.getRssi());
+
+            //проверка на то, добавлен ли данный маяк
+            boolean check = false;
+            Cursor d;
+            dbBeacon.open();
+            d = dbBeacon.getAllData();
+            if (d.moveToFirst()) {
+                int addressIndex = d.getColumnIndex(DBBeacon.KEY_ADDRESS);
+                do {
+//                    Log.d("Logm", result.getDevice().getAddress() + " :: " + d.getString(addressIndex));
+                    if (result.getDevice().getAddress().equals(d.getString(addressIndex))){
+                        check = true;
+                    }
+                } while (d.moveToNext());
+            }
+
+            //вносим данные по маячкам
+            if (check) {
+                dbBeacon.addRecSignal(result.getDevice().getAddress(), result.getRssi());
+//                Log.d("Logm",result.getDevice().getAddress() +" : "+ result.getRssi());
             }
         }
     };
@@ -233,5 +231,4 @@ public class BeaconInfo extends AppCompatActivity {
             }
         });
     }
-
 }

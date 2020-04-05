@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
 
     //переменная для фильтра расстояния для beacon = address
-    public  static String filtrAddress;
-    public  static Integer filtrAddressId;
+    public static String filtrAddress;
+    public static Integer filtrAddressId;
 
     DBBeacon dbBeacon;
 
@@ -95,6 +95,23 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 try{
                     Intent intent = new Intent(MainActivity.this, BeaconsList.class);
+                    startActivity(intent);
+                    finish();
+                }catch (Exception e){
+
+                }
+            }
+        });
+
+        // open PositionActivity
+
+        Button btPosition = (Button)findViewById(R.id.btPosition);
+
+        btPosition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    Intent intent = new Intent(MainActivity.this, PositionActivity.class);
                     startActivity(intent);
                     finish();
                 }catch (Exception e){
