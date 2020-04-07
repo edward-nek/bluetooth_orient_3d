@@ -20,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -32,8 +33,11 @@ public class PositionActivity extends AppCompatActivity {
     BluetoothLeScanner btScanner;
     private final static int REQUEST_ENABLE_BT = 1;
 
-    Button btBack; //кнопка назад
+//    Button btBack; //кнопка назад
+    ImageButton btSpisok; //кнопка открытия списка маяков
+    ImageButton btAdd; //кнопка открытия добавления маяка
     Button btFiltr; //кнопка фильтра по кол-ву маяков
+    Button btCorrect; //кнопка изменить фильтр
 
     EditText etFiltr;
     EditText etCount;
@@ -56,13 +60,41 @@ public class PositionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_position);
 
+        //скрыть панель навигации начало
+
+        final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+        getWindow().getDecorView().setSystemUiVisibility(flags);
+
+        final View decorView = getWindow().getDecorView();
+        decorView
+                .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
+                {
+
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility)
+                    {
+                        if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0)
+                        {
+                            decorView.setSystemUiVisibility(flags);
+                        }
+                    }
+                });
+
+        //скрыть панель навигации конец
+
         dbBeacon = new DBBeacon(this);
         dbBeacon.open();
         dbBeacon.clearSignalTable();
         dbBeacon.close();
 
-        btBack = (Button) findViewById(R.id.bt_pos_Back);
-        btBack.setOnClickListener(new View.OnClickListener() {
+        btSpisok = (ImageButton) findViewById(R.id.bt_map_spisok);
+        btSpisok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try{
@@ -88,7 +120,7 @@ public class PositionActivity extends AppCompatActivity {
                     dbBeacon.close();
 
 
-                    Intent intent = new Intent(PositionActivity.this, MainActivity.class);
+                    Intent intent = new Intent(PositionActivity.this, BeaconsList.class);
                     startActivity(intent);
                     overridePendingTransition(0, 0);
                     finish();
@@ -98,7 +130,89 @@ public class PositionActivity extends AppCompatActivity {
             }
         });
 
+        btAdd = (ImageButton) findViewById(R.id.bt_map_add);
+        btAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    stopScanning();
+
+                    //вывод добавленных сигналов
+                    Cursor cursor;
+                    dbBeacon.open();
+                    cursor = dbBeacon.getAllDataSignal();
+
+                    if (cursor.moveToFirst()) {
+                        int idIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_ID);
+                        int signalIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_RSSI);
+                        int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_BEACON_ADDRESS);
+                        do {
+                            String s;
+                            s = "id = "+ cursor.getString(idIndex) + " : rssi = " + cursor.getString(signalIndex) +
+                                    " : address = " + cursor.getString(addressIndex) + " ;";
+                            Log.d("Logm", s);
+
+                        } while (cursor.moveToNext());
+                    }
+                    dbBeacon.close();
+
+
+                    Intent intent = new Intent(PositionActivity.this, MainDeviceList.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                }catch (Exception e){
+
+                }
+            }
+        });
+
+//        btBack = (Button) findViewById(R.id.bt_pos_Back);
+//        btBack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                try{
+//                    stopScanning();
+//
+//                    //вывод добавленных сигналов
+//                    Cursor cursor;
+//                    dbBeacon.open();
+//                    cursor = dbBeacon.getAllDataSignal();
+//
+//                    if (cursor.moveToFirst()) {
+//                        int idIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_ID);
+//                        int signalIndex = cursor.getColumnIndex(DBBeacon.KEY_SIGNAL_RSSI);
+//                        int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_BEACON_ADDRESS);
+//                        do {
+//                            String s;
+//                            s = "id = "+ cursor.getString(idIndex) + " : rssi = " + cursor.getString(signalIndex) +
+//                                    " : address = " + cursor.getString(addressIndex) + " ;";
+//                            Log.d("Logm", s);
+//
+//                        } while (cursor.moveToNext());
+//                    }
+//                    dbBeacon.close();
+//
+//
+//                    Intent intent = new Intent(PositionActivity.this, MainActivity.class);
+//                    startActivity(intent);
+//                    overridePendingTransition(0, 0);
+//                    finish();
+//                }catch (Exception e){
+//
+//                }
+//            }
+//        });
+
         btFiltr = (Button) findViewById(R.id.bt_pos_Filtr);
+        btCorrect = (Button) findViewById(R.id.bt_pos_Correct);
+
+        etFiltr = (EditText) findViewById(R.id.et_pos_Filtr);
+        etCount = (EditText) findViewById(R.id.et_pos_Count);
+
+        btCorrect.setEnabled(false);
+        btFiltr.setEnabled(true);
+
         btFiltr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,14 +223,30 @@ public class PositionActivity extends AppCompatActivity {
                             InputMethodManager.HIDE_NOT_ALWAYS);
 
                     filtr();
+
                 }catch (Exception e){
 
                 }
             }
         });
 
-        etFiltr = (EditText) findViewById(R.id.et_pos_Filtr);
-        etCount = (EditText) findViewById(R.id.et_pos_Count);
+        btCorrect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    btCorrect.setEnabled(false);
+                    btFiltr.setEnabled(true);
+                    etFiltr.setEnabled(true);
+                    etCount.setEnabled(true);
+                    etFiltr.setText(null);
+                    etCount.setText(null);
+                    stopScanning();
+
+                }catch (Exception e){
+
+                }
+            }
+        });
 
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
@@ -140,6 +270,11 @@ public class PositionActivity extends AppCompatActivity {
             count = new Integer(etCount.getText().toString()); //введенное количество измерений для фильтра
 
             //dbBeacon.query(DBBeacon.TABLE_BEACONS, null, );
+
+            btCorrect.setEnabled(true);
+            btFiltr.setEnabled(false);
+            etFiltr.setEnabled(false);
+            etCount.setEnabled(false);
         }
         else{
             Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();
@@ -228,5 +363,20 @@ public class PositionActivity extends AppCompatActivity {
         else {
             countBeacon ++;
         }
+    }
+
+    //отслеживание нажатий на экран
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 }

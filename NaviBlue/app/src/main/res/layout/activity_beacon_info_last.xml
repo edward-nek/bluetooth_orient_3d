@@ -4,174 +4,131 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_green"
     tools:context=".BeaconInfo">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="410dp"
-        android:layout_height="73dp"
-        android:layout_centerVertical="true"
-        android:background="@color/white"
-        android:gravity="center"
-        android:text="ИНФОРМАЦИЯ"
-        android:textColor="@color/dark"
-        android:textSize="28dp"
-
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="118dp"
-        android:layout_height="144dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-
-        app:layout_constraintHorizontal_bias="0.275"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.274"
-        app:srcCompat="@drawable/beacon" />
-
-    <TextView
-        android:id="@+id/tv_inf_X"
+    <Button
+        android:id="@+id/bt_Back_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="X = 123"
-        android:textSize="16dp"
-
+        android:text="назад"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.701"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.236" />
+        app:layout_constraintVertical_bias="0.99"
+        app:layout_constraintHorizontal_bias="0.05"/>
 
     <TextView
-        android:id="@+id/tv_inf_Y"
+        android:id="@+id/tvTytleBeacon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Y = 123"
-        android:textSize="16dp"
-
+        android:text="Маяк:"
+        android:textSize="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.701"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.287" />
+        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintHorizontal_bias="0.5" />
 
     <TextView
-        android:id="@+id/tv_inf_Z"
+        android:id="@+id/tvNameBeacon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Z = 123"
-        android:textSize="16dp"
-
-
+        android:text="Text"
+        android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.701"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.338" />
-
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintHorizontal_bias="0.5" />
     <TextView
-        android:id="@+id/tv_inf_Rssi"
+        android:id="@+id/tvAddressBeacon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RSSI = Нет связи"
-        android:textSize="16dp"
-
-
+        android:text="Text"
+        android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.701"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.387" />
-
+        app:layout_constraintVertical_bias="0.35"
+        app:layout_constraintHorizontal_bias="0.5" />
     <TextView
-        android:id="@+id/tv_inf_Name"
+        android:id="@+id/tvXBeacon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NameTest"
-        android:textSize="22dp"
-
+        android:text="Text"
+        android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.115" />
-
+        app:layout_constraintVertical_bias="0.4"
+        app:layout_constraintHorizontal_bias="0.5" />
     <TextView
-        android:id="@+id/tv_inf_Address"
+        android:id="@+id/tvYBeacon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="AddressTest"
-        android:textSize="16dp"
+        android:text="Text"
+        android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.171" />
+        app:layout_constraintVertical_bias="0.45"
+        app:layout_constraintHorizontal_bias="0.5" />
+    <TextView
+        android:id="@+id/tvZBeacon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Text"
+        android:textSize="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.5" />
+    <TextView
+        android:id="@+id/tvRssiBeacon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65"
+        app:layout_constraintHorizontal_bias="0.5" />
+    <TextView
+        android:id="@+id/tvDistanceBeacon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Расcтояние: В разработке"
+        android:textSize="24dp"
+        android:textColor="@color/red"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.75"
+        app:layout_constraintHorizontal_bias="0.5" />
 
     <Button
-        android:id="@+id/bt_inf_Back"
+        android:id="@+id/bt_deleteBeacon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/roundrect"
-        android:text="Назад"
-
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.02"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.99" />
-
-    <Button
-        android:id="@+id/bt_inf_Delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/roundrect"
         android:text="Удалить"
-
+        android:background="@color/red"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.98"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.99" />
+        app:layout_constraintVertical_bias="0.99"
+        app:layout_constraintHorizontal_bias="0.95" />
 
-
-    <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="413dp"
-        android:layout_height="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.442"
-        app:srcCompat="@android:color/background_dark" />
-
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart"
-        android:layout_width="343dp"
-        android:layout_height="233dp"
-        android:layout_marginTop="392dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

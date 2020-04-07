@@ -1,12 +1,20 @@
 package ru.nekrasoved.naviblue;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,38 +22,110 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 
 public class MainDeviceList extends AppCompatActivity{
+
+    private Button statusButton;
+    private BluetoothAdapter bluetooth;
+    private ArrayList<BluetoothDevice> mDevices = new ArrayList<>();
+    private ListView listDevices;
+
+
+
+    private DeviceListAdapter mDeviceListAdapter;
+    private ProgressDialog mProgressDialog;
+
+
 
     public int pos;
     public Spinner mSpinner;
     public EditText etX;
     public EditText etY;
     public EditText etZ;
+    public EditText etName;
+
+    public ArrayAdapter<String> adapter;
 
     DBBeacon dbBeacon;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_devices);
 
-        Button btBack = (Button)findViewById(R.id.btBack);
+        //скрыть панель навигации начало
+
+        final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+        getWindow().getDecorView().setSystemUiVisibility(flags);
+
+        final View decorView = getWindow().getDecorView();
+        decorView
+                .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
+                {
+
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility)
+                    {
+                        if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0)
+                        {
+                            decorView.setSystemUiVisibility(flags);
+                        }
+                    }
+                });
+
+        //скрыть панель навигации конец
 
         etX = (EditText) findViewById(R.id.etX);
         etY = (EditText) findViewById(R.id.etY);
         etZ = (EditText) findViewById(R.id.etZ);
+        etName = (EditText) findViewById(R.id.etName);
 
         dbBeacon = new DBBeacon(this);
+        dbBeacon.open();
 
-        btBack.setOnClickListener(new View.OnClickListener() {
+        //statusButton = (Button) findViewById(R.id.status_blue);
+        bluetooth = BluetoothAdapter.getDefaultAdapter();
+        if(bluetooth == null){
+            Toast.makeText(this, "Ваше устройство не поддерживает bluetooth!", Toast.LENGTH_LONG).show();
+            finish();
+        }
+
+//        if (bluetooth.isEnabled()) {
+//                statusButton.setText("On");
+//        }
+
+        mDeviceListAdapter = new DeviceListAdapter(this, R.layout.device_item, mDevices);
+
+
+        try {
+            findDevice();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        ImageButton btSpisok = (ImageButton) findViewById(R.id.bt_add_spisok);
+        ImageButton btMap = (ImageButton) findViewById(R.id.bt_add_map);
+
+        btSpisok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try{
-                    Intent intent = new Intent(MainDeviceList.this, MainActivity.class);
+                    Intent intent = new Intent(MainDeviceList.this, BeaconsList.class);
                     startActivity(intent);
                     overridePendingTransition(0, 0);
                     finish();
@@ -55,13 +135,19 @@ public class MainDeviceList extends AppCompatActivity{
             }
         });
 
+        btMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    Intent intent = new Intent(MainDeviceList.this, PositionActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                }catch (Exception e){
 
-        // адаптер
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, MainActivity.mBaseDevices.spinner_name);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        mSpinner = (Spinner) findViewById(R.id.spinner);
-        mSpinner.setAdapter(adapter);
+                }
+            }
+        });
 
         // слушатель выбора в списке
         AdapterView.OnItemSelectedListener itemListener = new AdapterView.OnItemSelectedListener() {
@@ -106,7 +192,14 @@ public class MainDeviceList extends AppCompatActivity{
 
             //считывание данных при нажатии кнопки сохранить
 
-            String nameBeacon = MainActivity.mBaseDevices.name.get(pos);
+            String nameBeacon;
+
+            if (String.valueOf(etName.getText()).length() > 0) {
+                nameBeacon = String.valueOf(etName.getText());
+            }
+            else {
+                nameBeacon = MainActivity.mBaseDevices.name.get(pos);
+            }
             String addressBeacon = MainActivity.mBaseDevices.address.get(pos);
             Integer posXbeacon = new Integer(String.valueOf(etX.getText()));
             Integer posYbeacon = new Integer(String.valueOf(etY.getText()));
@@ -152,7 +245,7 @@ public class MainDeviceList extends AppCompatActivity{
             MainActivity.mBaseDevices.spinner_name.remove(pos);
             //главное меню
 
-            Intent intent = new Intent(MainDeviceList.this, MainActivity.class);
+            Intent intent = new Intent(MainDeviceList.this, BeaconsList.class);
             startActivity(intent);
             overridePendingTransition(0, 0);
             finish();
@@ -160,5 +253,140 @@ public class MainDeviceList extends AppCompatActivity{
         else{
             Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();
         }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void findDevice() throws InterruptedException {
+
+        bluetooth.enable();
+
+        Thread.sleep(400); //для того, чтобы успел включиться блютуз, пауза
+
+
+        checkPermissionLocation();
+
+        if (!bluetooth.isDiscovering()) {
+            bluetooth.startDiscovery();
+        }
+
+        if (bluetooth.isDiscovering()) {
+            bluetooth.cancelDiscovery();
+            bluetooth.startDiscovery();
+        }
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter);
+
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void checkPermissionLocation() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
+            int check = checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
+            check += checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
+
+            if (check != 0){
+                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1002);
+            }
+        }
+    }
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)){
+                //Toast.makeText(MainActivity.this, "Поиск начался", Toast.LENGTH_LONG).show();
+
+                mProgressDialog = ProgressDialog.show(MainDeviceList.this, "Поиск устройств", "Пожалуйста подождите");
+
+                MainActivity.mBaseDevices = new BaseDevices();
+            }
+            if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){
+
+                mProgressDialog.dismiss();
+
+                //Toast.makeText(MainActivity.this, "Поиск завершен", Toast.LENGTH_LONG).show();
+                showListDevices();
+            }
+            if (action.equals(BluetoothDevice.ACTION_FOUND)){
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device != null){
+                    if (!mDevices.contains(device)){
+
+                        //добавляем устройство в базу устройств
+                        if (checkCopy(device.getAddress())) {
+                            MainActivity.mBaseDevices.address.add(device.getAddress());
+
+                            if (device.getName() == null) {
+                                MainActivity.mBaseDevices.name.add("Not Name");
+                                MainActivity.mBaseDevices.spinner_name.add("Not Name : " + device.getAddress()); //костыль
+                            } else {
+                                MainActivity.mBaseDevices.name.add(device.getName());
+                                MainActivity.mBaseDevices.spinner_name.add(device.getName() + " : " + device.getAddress()); //костыль
+                            }
+
+                            mDeviceListAdapter.add(device);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    //проверка на копии
+
+    private Boolean checkCopy(String address) {
+        Boolean check = true;
+        Cursor cursor = dbBeacon.getAllData();
+
+        if (cursor.moveToFirst()) {
+            int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
+            do {
+                if (cursor.getString(addressIndex).equals(address)){
+                    check = false;
+                }
+            } while (cursor.moveToNext());
+        }
+        return check;
+    }
+
+    private void showListDevices() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Найденные устройства: ");
+
+        View view = getLayoutInflater().inflate(R.layout.list_devices_view, null);
+        listDevices = view.findViewById(R.id.list_devices);
+        listDevices.setAdapter(mDeviceListAdapter);
+
+        builder.setView(view);
+        builder.setNegativeButton("OK", null);
+        builder.create();
+        builder.show();
+
+        // адаптер
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, MainActivity.mBaseDevices.spinner_name);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        mSpinner = (Spinner) findViewById(R.id.spinner);
+        mSpinner.setAdapter(adapter);
+    }
+
+    //отслеживание нажатий на экран
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 }
