@@ -253,7 +253,7 @@ public class BeaconInfo extends AppCompatActivity {
             //set Rssi beacon
             if (result.getDevice().getAddress().equals(MainActivity.filtrAddress)){
                 tvRssi = (TextView) findViewById(R.id.tv_inf_Rssi);
-                tvRssi.setText("rssi = " + result.getRssi() + "TxPower = " + result.getTxPower());
+                tvRssi.setText("rssi = " + result.getRssi());
 
                 count++;
                 sum += result.getRssi();
