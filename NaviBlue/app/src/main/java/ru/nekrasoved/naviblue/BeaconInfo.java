@@ -11,6 +11,7 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 
 import java.util.ArrayList;
@@ -48,7 +50,15 @@ public class BeaconInfo extends AppCompatActivity {
 
     DBBeacon dbBeacon;
 
-    int count;
+
+    int count; //счетчик для усреднения
+    int count_beacon; //счетчик для X
+    int sum; //усреднение
+
+    int LIMIT_CHECK = 2; //кол-во измерений для усреднения
+    int LIMIT_GRAPH = 15; //кол-во точек на графике
+
+    List<Entry> entries;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -56,7 +66,35 @@ public class BeaconInfo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beacon_info);
 
+        count_beacon = 0;
+        sum = 0;
         count = 0;
+        entries = new ArrayList<Entry>();
+        chart = (LineChart) findViewById(R.id.chart);
+        chart.getDescription().setEnabled(false);
+        chart.setTouchEnabled(true);
+        chart.setDrawGridBackground(false);
+
+        tvName = (TextView) findViewById(R.id.tv_inf_Name);
+
+        entries.add(new Entry(0, 0));
+        LineDataSet dataSet = new LineDataSet(entries, " "); // add entries to dataset
+        dataSet.setColor(Color.RED);
+        dataSet.setCircleColor(Color.WHITE);
+        LineData lineData = new LineData(dataSet);
+        chart.setData(lineData);
+        chart.invalidate(); // refresh
+
+        entries = new ArrayList<Entry>();
+
+        // enable scaling and dragging
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
+        // chart.setScaleXEnabled(true);
+        // chart.setScaleYEnabled(true);
+
+        // force pinch zoom along both axis
+        chart.setPinchZoom(true);
 
         //скрыть панель навигации начало
 
@@ -85,9 +123,6 @@ public class BeaconInfo extends AppCompatActivity {
                 });
 
         //скрыть панель навигации конец
-
-
-        chart = (LineChart) findViewById(R.id.chart);
 
         dbBeacon = new DBBeacon(this); //БД Маяков
         dbBeacon.open();
@@ -212,22 +247,32 @@ public class BeaconInfo extends AppCompatActivity {
 
     // Device scan callback.
     private ScanCallback leScanCallback = new ScanCallback() {
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             //set Rssi beacon
             if (result.getDevice().getAddress().equals(MainActivity.filtrAddress)){
                 tvRssi = (TextView) findViewById(R.id.tv_inf_Rssi);
-                tvRssi.setText("rssi = " + result.getRssi());
+                tvRssi.setText("rssi = " + result.getRssi() + "TxPower = " + result.getTxPower());
 
                 count++;
-                List<Entry> entries = new ArrayList<Entry>();
-                entries.add(new Entry(count, result.getRssi()));
-                LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
-                dataSet.setColor(1);
-                dataSet.setValueTextColor(1); // styling, ...
-                LineData lineData = new LineData(dataSet);
-                chart.setData(lineData);
-                chart.invalidate(); // refresh
+                sum += result.getRssi();
+                if (count >= LIMIT_CHECK) {
+                    count_beacon += LIMIT_CHECK;
+                    sum = sum / LIMIT_CHECK;
+                    if (count_beacon > LIMIT_CHECK * LIMIT_GRAPH) {
+                        entries.remove(0);
+                    }
+                    entries.add(new Entry(count_beacon, sum));
+                    LineDataSet dataSet = new LineDataSet(entries, tvName.getText().toString()); // add entries to dataset
+                    dataSet.setColor(Color.RED);
+                    dataSet.setCircleColor(Color.WHITE);
+                    LineData lineData = new LineData(dataSet);
+                    chart.setData(lineData);
+                    chart.invalidate(); // refresh
+                    count = 0;
+                    sum = 0;
+                }
 
             }
         }
