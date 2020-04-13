@@ -345,10 +345,11 @@ public class PositionActivity extends AppCompatActivity {
                 int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
                 do {
                     double rssi = dbBeacon.beaconSignal(cursor.getString(addressIndex), count);
+                    double distance = getDistance(rssi);
                     Log.d("Logm", cursor.getString(nameIndex) + " :: " + cursor.getString(addressIndex) +
                             " : " + rssi);
-                    filtrBeacons.add(cursor.getString(nameIndex) + " :: " + cursor.getString(addressIndex) +
-                            " : rssi = " + rssi);
+                    filtrBeacons.add(cursor.getString(nameIndex) + " :: " +
+                            " : rssi = " + rssi + " : dist = " + distance);
 
                     // адаптер
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, filtrBeacons);
@@ -379,4 +380,25 @@ public class PositionActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
+
+    //расчет дистанции до маяка
+    public double getDistance(double rssi) {
+
+        double distance = 0;
+
+        double measuredPower = -50; //потери в свободном пространстве на расстоянии d0
+        double n = 2; //коэффициент погрешности зависящий от типа помещения и т.п.
+
+        distance = Math.pow(10, ((measuredPower - rssi)/(10 * n)));
+
+        Log.d("Logm", "DISTANCE = " + distance + " : " + rssi);
+        return distance;
+    }
+    //конец расчета дистанции до маяка
+
+    //определение координат относительно маяков
+    public void getPosition() {
+
+    }
+    //конец определения координат
 }

@@ -8,4 +8,11 @@
     <color name="dark">#000000</color>
     <color name="lw_green">#00a480</color>
 
+
+    <color name="header">#006B53</color> <!-- #FFFFFF -->
+    <color name="text_header">#000000</color>
+    <color name="line">#34000000</color> <!-- #000000 -->
+    <color name="button">#00a480</color> <!-- #00a480 -->
+    <color name="background">#FFFFFF</color> <!-- #006b53 -->
+
 </resources>

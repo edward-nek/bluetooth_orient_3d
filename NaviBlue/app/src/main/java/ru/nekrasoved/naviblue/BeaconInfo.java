@@ -15,8 +15,10 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -36,7 +38,7 @@ public class BeaconInfo extends AppCompatActivity {
     BluetoothLeScanner btScanner;
     private final static int REQUEST_ENABLE_BT = 1;
 
-    Button btBack; //назад
+    ImageButton btBack; //назад
     Button btDelete; //удалить маяк
 
     LineChart chart; //блок с графиком
@@ -53,12 +55,13 @@ public class BeaconInfo extends AppCompatActivity {
 
     int count; //счетчик для усреднения
     int count_beacon; //счетчик для X
-    int sum; //усреднение
+    float sum; //усреднение
 
-    int LIMIT_CHECK = 2; //кол-во измерений для усреднения
+    int LIMIT_CHECK = 10; //кол-во измерений для усреднения
     int LIMIT_GRAPH = 15; //кол-во точек на графике
 
     List<Entry> entries;
+    List<Entry> distance;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -86,6 +89,7 @@ public class BeaconInfo extends AppCompatActivity {
         chart.invalidate(); // refresh
 
         entries = new ArrayList<Entry>();
+        distance = new ArrayList<Entry>();
 
         // enable scaling and dragging
         chart.setDragEnabled(true);
@@ -129,7 +133,7 @@ public class BeaconInfo extends AppCompatActivity {
 
         final Cursor cursor = dbBeacon.getAllData();
 
-        btBack = (Button)findViewById(R.id.bt_inf_Back);
+        btBack = (ImageButton) findViewById(R.id.ibt_inf_Back);
         btBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -251,6 +255,7 @@ public class BeaconInfo extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             //set Rssi beacon
+            Log.d("Logm", result.getDevice().getAddress());
             if (result.getDevice().getAddress().equals(MainActivity.filtrAddress)){
                 tvRssi = (TextView) findViewById(R.id.tv_inf_Rssi);
                 tvRssi.setText("rssi = " + result.getRssi());
@@ -262,12 +267,23 @@ public class BeaconInfo extends AppCompatActivity {
                     sum = sum / LIMIT_CHECK;
                     if (count_beacon > LIMIT_CHECK * LIMIT_GRAPH) {
                         entries.remove(0);
+                        distance.remove(0);
                     }
+
+                    float dist = getDistance(sum);
+                    distance.add(new Entry(count_beacon, dist));
+                    LineDataSet dataSet_dist = new LineDataSet(distance, "distance"); // add entries to dataset
+                    dataSet_dist.setColor(Color.BLUE);
+                    dataSet_dist.setCircleColor(Color.WHITE);
+//                    LineData lineData_dist = new LineData(dataSet_dist);
+//                    chart.setData(lineData_dist);
+
+
                     entries.add(new Entry(count_beacon, sum));
-                    LineDataSet dataSet = new LineDataSet(entries, tvName.getText().toString()); // add entries to dataset
+                    LineDataSet dataSet = new LineDataSet(entries, "rssi"); // add entries to dataset
                     dataSet.setColor(Color.RED);
                     dataSet.setCircleColor(Color.WHITE);
-                    LineData lineData = new LineData(dataSet);
+                    LineData lineData = new LineData(dataSet, dataSet_dist);
                     chart.setData(lineData);
                     chart.invalidate(); // refresh
                     count = 0;
@@ -312,5 +328,19 @@ public class BeaconInfo extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
+
+    //расчет дистанции до маяка
+    public float getDistance(double rssi) {
+
+        float distance = 0;
+
+        double measuredPower = -50; //потери в свободном пространстве на расстоянии d0
+        double n = 2; //коэффициент погрешности зависящий от типа помещения и т.п.
+
+        distance = (float)Math.pow(10, ((measuredPower - rssi)/(10 * n)));
+
+        return distance;
+    }
+    //конец расчета дистанции до маяка
 
 }

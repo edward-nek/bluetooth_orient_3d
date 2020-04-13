@@ -4,19 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_green"
+    android:background="@color/background"
     tools:context=".BeaconInfo">
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="410dp"
-        android:layout_height="73dp"
+        android:layout_width="412dp"
+        android:layout_height="50dp"
         android:layout_centerVertical="true"
-        android:background="@color/white"
+
+        android:background="@color/header"
+        android:textColor="@color/text_header"
+
         android:gravity="center"
         android:text="ИНФОРМАЦИЯ"
-        android:textColor="@color/dark"
-        android:textSize="28dp"
+        android:textSize="24dp"
+
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -122,34 +125,36 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.171" />
 
-    <Button
-        android:id="@+id/bt_inf_Back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/roundrect"
-        android:text="Назад"
+    <ImageButton
+        android:id="@+id/ibt_inf_Back"
+
+
+        android:layout_width="32dp"
+        android:layout_height="33dp"
+        android:background="@color/header"
 
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.02"
+        app:layout_constraintHorizontal_bias="0.015"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.99" />
+        app:layout_constraintVertical_bias="0.015"
+        app:srcCompat="@drawable/back" />
+
 
     <Button
         android:id="@+id/bt_inf_Delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/roundrect"
+        android:background="@drawable/button"
         android:text="Удалить"
 
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.98"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.99" />
-
+        app:layout_constraintVertical_bias="0.989" />
 
     <ImageView
         android:id="@+id/imageView5"
