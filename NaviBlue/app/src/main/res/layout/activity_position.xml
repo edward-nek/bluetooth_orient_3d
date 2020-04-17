@@ -90,7 +90,7 @@
         android:id="@+id/tv_pos_X"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="X = 123"
+        android:text="X ="
         android:textSize="16dp"
 
         app:layout_constraintBottom_toBottomOf="parent"
@@ -104,7 +104,7 @@
         android:id="@+id/tv_pos_Y"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Y = 123"
+        android:text="Y ="
         android:textSize="16dp"
 
         app:layout_constraintBottom_toBottomOf="parent"
@@ -118,7 +118,7 @@
         android:id="@+id/tv_pos_Z"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Z = 123"
+        android:text="Z ="
         android:textSize="16dp"
 
 

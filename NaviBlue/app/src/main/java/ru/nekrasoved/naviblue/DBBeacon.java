@@ -137,7 +137,8 @@ public class DBBeacon{
 
     //получить список действующих маяков
     public Cursor beaconList(int limit) {
-        String sqlQuery = "SELECT b.name AS name, b.address AS address " +
+        String sqlQuery = "SELECT b.name AS name, b.address AS address, b.posX AS posX, " +
+                "b.posY AS posY, b.posZ AS posZ " +
                 "FROM " + TABLE_BEACONS + " AS b " +
                 "INNER JOIN " + TABLE_SIGNAL + " AS s " +
                 "ON b." + KEY_ADDRESS + " = " +
