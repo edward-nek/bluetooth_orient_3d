@@ -1,6 +1,7 @@
 package ru.nekrasoved.naviblue;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,6 +14,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -46,10 +49,8 @@ public class BeaconsList extends AppCompatActivity {
         //скрыть панель навигации начало
 
         final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
         getWindow().getDecorView().setSystemUiVisibility(flags);
@@ -70,6 +71,11 @@ public class BeaconsList extends AppCompatActivity {
                 });
 
         //скрыть панель навигации конец
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("Cписок маяков");
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#006B53")));
+
 
         dbBeacon = new DBBeacon(this); //БД Маяков
         dbBeacon.open();
@@ -217,10 +223,8 @@ public class BeaconsList extends AppCompatActivity {
         super.onWindowFocusChanged(hasFocus);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 }

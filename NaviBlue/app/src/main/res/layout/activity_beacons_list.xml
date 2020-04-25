@@ -4,25 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_green"
+    android:background="@color/background"
     tools:context=".BeaconsList">
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="410dp"
-        android:layout_height="73dp"
-        android:layout_centerVertical="true"
-        android:background="@color/white"
-        android:gravity="center"
-        android:text="CПИСОК МАЯКОВ"
-        android:textColor="@color/dark"
-        android:textSize="28dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
 
     <ListView
         android:id="@+id/list_beacon"
@@ -30,7 +13,8 @@
         android:layout_height="522dp"
         android:foregroundGravity="center"
         android:dividerHeight="18dp"
-        android:divider="@color/bg_green"
+        android:divider="@color/background"
+
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -39,12 +23,24 @@
         app:layout_constraintVertical_bias="0.4"
         tools:ignore="MissingConstraints" />
 
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:srcCompat="@color/menu_button"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1"/>
+
     <ImageButton
         android:id="@+id/bt_spisok_spisok"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="136dp"
         android:layout_height="50dp"
-        android:background="@color/white"
         app:srcCompat="@drawable/spisok1"
         android:scaleType="center"
 
@@ -61,7 +57,6 @@
         android:layout_height="50dp"
         app:srcCompat="@drawable/add1"
         style="?android:attr/borderlessButtonStyle"
-        android:background="@color/white"
         android:scaleType="center"
 
         app:layout_constraintBottom_toBottomOf="parent"
@@ -77,7 +72,6 @@
         android:layout_height="50dp"
         app:srcCompat="@drawable/map1"
         style="?android:attr/borderlessButtonStyle"
-        android:background="@color/white"
         android:scaleType="center"
 
         app:layout_constraintBottom_toBottomOf="parent"

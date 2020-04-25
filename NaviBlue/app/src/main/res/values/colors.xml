@@ -6,13 +6,15 @@
     <color name="bg_green">#006b53</color>
     <color name="white">#FFFFFF</color>
     <color name="dark">#000000</color>
-    <color name="lw_green">#00a480</color>
+    <color name="lw_green">#539584</color>
 
 
     <color name="header">#006B53</color> <!-- #FFFFFF -->
     <color name="text_header">#000000</color>
     <color name="line">#34000000</color> <!-- #000000 -->
     <color name="button">#00a480</color> <!-- #00a480 -->
-    <color name="background">#FFFFFF</color> <!-- #006b53 -->
+    <color name="background">#539584</color> <!-- #006b53 -->
+    <color name="menu_button">#CC006B53</color> <!-- #FFFFFF -->
+    <color name="line_background">#80000000</color> <!-- #000000 -->
 
 </resources>
