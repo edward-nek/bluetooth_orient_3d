@@ -52,6 +52,9 @@ public class BeaconInfo extends AppCompatActivity {
     TextView tvZ; //координата Z
     TextView tvRssi; //уровень сигнала Rssi
 
+    TextView tvN; //коэфф среды
+    TextView tvPower; //мощность маяка
+
     DBBeacon dbBeacon;
 
 
@@ -64,6 +67,9 @@ public class BeaconInfo extends AppCompatActivity {
 
     List<Entry> entries;
     List<Entry> distance;
+
+    int N;
+    int Power;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -167,6 +173,9 @@ public class BeaconInfo extends AppCompatActivity {
             int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
             int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
 
+            int nIndex = cursor.getColumnIndex(DBBeacon.KEY_N);
+            int powerIndex = cursor.getColumnIndex(DBBeacon.KEY_POWER);
+
             int i = 0;
 
             do {
@@ -192,6 +201,16 @@ public class BeaconInfo extends AppCompatActivity {
                     //set Z beacon
                     tvZ = (TextView) findViewById(R.id.tv_inf_Z);
                     tvZ.setText("Z = " + cursor.getInt(zIndex));
+
+                    //set N beacon
+                    tvN = (TextView) findViewById(R.id.tv_inf_N);
+                    tvN.setText("N = " + cursor.getInt(nIndex));
+                    N = cursor.getInt(nIndex);
+
+                    //set Power beacon
+                    tvPower = (TextView) findViewById(R.id.tv_inf_Power);
+                    tvPower.setText("Power = " + cursor.getInt(powerIndex));
+                    Power = cursor.getInt(powerIndex);
                 }
             } while (cursor.moveToNext());
         }
@@ -270,7 +289,8 @@ public class BeaconInfo extends AppCompatActivity {
                         distance.remove(0);
                     }
 
-                    float dist = getDistance(sum);
+                    float dist = getDistance(sum, N, Power);
+
                     distance.add(new Entry(count_beacon, dist));
                     LineDataSet dataSet_dist = new LineDataSet(distance, "distance"); // add entries to dataset
                     dataSet_dist.setColor(Color.BLUE);
@@ -328,15 +348,11 @@ public class BeaconInfo extends AppCompatActivity {
     }
 
     //расчет дистанции до маяка
-    public float getDistance(double rssi) {
+    public float getDistance(float rssi, int n, int power) {
 
         float distance = 0;
-
-        double measuredPower = -50; //потери в свободном пространстве на расстоянии d0
-        double n = 2; //коэффициент погрешности зависящий от типа помещения и т.п.
-
-        distance = (float)Math.pow(10, ((measuredPower - rssi)/(10 * n)));
-
+        distance = (float) Math.pow(10, ((power - rssi)/(10 * n)));
+        Log.d("Logm", "DISTANCE = " + distance + " : " + rssi);
         return distance;
     }
     //конец расчета дистанции до маяка

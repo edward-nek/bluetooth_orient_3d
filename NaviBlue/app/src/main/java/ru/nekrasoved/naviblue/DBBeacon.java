@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 
 public class DBBeacon{
 
-    public static final int DATABASE_VERSION = 8;
+    public static final int DATABASE_VERSION = 10;
     public static final String  DATABASE_NAME = "beaconDb";
     public static final String  TABLE_BEACONS = "beacons";
 
@@ -23,10 +23,15 @@ public class DBBeacon{
     public static final String  KEY_POS_Y = "posY";
     public static final String  KEY_POS_Z = "posZ";
 
+    public static final String  KEY_N = "n";
+    public static final String  KEY_POWER = "power";
+
+
     private static final String DB_CREATE =
             "create table " + TABLE_BEACONS + " (" + KEY_ID + " integer primary key autoincrement," +
                     KEY_NAME + " text," + KEY_ADDRESS + " text," + KEY_POS_X + " integer," +
-                    KEY_POS_Y + " integer," + KEY_POS_Z + " integer" + ");";
+                    KEY_POS_Y + " integer," + KEY_POS_Z + " integer," + KEY_N + " integer," +
+                    KEY_POWER + " integer" +");";
 
     //таблица измерения сигнала маячков
     public static final String TABLE_SIGNAL = "signal";
@@ -70,13 +75,16 @@ public class DBBeacon{
     }
 
     // добавить запись в DB_TABLE
-    public void addRec(String name, String address, Integer x, Integer y, Integer z) {
+    public void addRec(String name, String address, Integer x, Integer y, Integer z, Integer n, Integer power) {
         ContentValues cv = new ContentValues();
         cv.put(KEY_NAME, name);
         cv.put(KEY_ADDRESS, address);
         cv.put(KEY_POS_X, x);
         cv.put(KEY_POS_Y, y);
         cv.put(KEY_POS_Z, z);
+
+        cv.put(KEY_N, n);
+        cv.put(KEY_POWER, power);
 
         database.insert(TABLE_BEACONS, null, cv);
     }
@@ -138,7 +146,7 @@ public class DBBeacon{
     //получить список действующих маяков
     public Cursor beaconList(int limit) {
         String sqlQuery = "SELECT b.name AS name, b.address AS address, b.posX AS posX, " +
-                "b.posY AS posY, b.posZ AS posZ " +
+                "b.posY AS posY, b.posZ AS posZ, b.n AS n, b.power AS power " +
                 "FROM " + TABLE_BEACONS + " AS b " +
                 "INNER JOIN " + TABLE_SIGNAL + " AS s " +
                 "ON b." + KEY_ADDRESS + " = " +

@@ -33,7 +33,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 
-public class MainDeviceList extends AppCompatActivity{
+public class MainDeviceList extends AppCompatActivity {
 
     private Button statusButton;
     private BluetoothAdapter bluetooth;
@@ -41,22 +41,25 @@ public class MainDeviceList extends AppCompatActivity{
     private ListView listDevices;
 
 
-
     private DeviceListAdapter mDeviceListAdapter;
     private ProgressDialog mProgressDialog;
 
 
-
-    public int pos;
+    public int pos = 0;
     public Spinner mSpinner;
     public EditText etX;
     public EditText etY;
     public EditText etZ;
     public EditText etName;
 
+    public EditText etN;
+    public EditText etPower;
+
     public ArrayAdapter<String> adapter;
 
     DBBeacon dbBeacon;
+
+    public AdapterView.OnItemSelectedListener itemListener;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -74,14 +77,11 @@ public class MainDeviceList extends AppCompatActivity{
 
         final View decorView = getWindow().getDecorView();
         decorView
-                .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
-                {
+                .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
 
                     @Override
-                    public void onSystemUiVisibilityChange(int visibility)
-                    {
-                        if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0)
-                        {
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                             decorView.setSystemUiVisibility(flags);
                         }
                     }
@@ -99,12 +99,15 @@ public class MainDeviceList extends AppCompatActivity{
         etZ = (EditText) findViewById(R.id.etZ);
         etName = (EditText) findViewById(R.id.etName);
 
+        etN = (EditText) findViewById(R.id.etN);
+        etPower = (EditText) findViewById(R.id.etPower);
+
         dbBeacon = new DBBeacon(this);
         dbBeacon.open();
 
         //statusButton = (Button) findViewById(R.id.status_blue);
         bluetooth = BluetoothAdapter.getDefaultAdapter();
-        if(bluetooth == null){
+        if (bluetooth == null) {
             Toast.makeText(this, "Ваше устройство не поддерживает bluetooth!", Toast.LENGTH_LONG).show();
             finish();
         }
@@ -129,12 +132,12 @@ public class MainDeviceList extends AppCompatActivity{
         btSpisok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
+                try {
                     Intent intent = new Intent(MainDeviceList.this, BeaconsList.class);
                     startActivity(intent);
                     overridePendingTransition(0, 0);
                     finish();
-                }catch (Exception e){
+                } catch (Exception e) {
 
                 }
             }
@@ -143,19 +146,19 @@ public class MainDeviceList extends AppCompatActivity{
         btMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
+                try {
                     Intent intent = new Intent(MainDeviceList.this, PositionActivity.class);
                     startActivity(intent);
                     overridePendingTransition(0, 0);
                     finish();
-                }catch (Exception e){
+                } catch (Exception e) {
 
                 }
             }
         });
 
         // слушатель выбора в списке
-        AdapterView.OnItemSelectedListener itemListener = new AdapterView.OnItemSelectedListener() {
+        itemListener = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 pos = position;
@@ -166,10 +169,6 @@ public class MainDeviceList extends AppCompatActivity{
 
             }
         };
-        if (MainActivity.mBaseDevices.name.size() > 0) {
-            mSpinner.setOnItemSelectedListener(itemListener);
-        }
-
     }
 
     public void SaveBeacon(View view) {
@@ -177,6 +176,7 @@ public class MainDeviceList extends AppCompatActivity{
 
         if ((MainActivity.mBaseDevices.name.size() > 0) && (etX.length() > 0) &&
                 (etY.length() > 0) && (etZ.length() > 0)) {
+
 
             //late version
 //            MainActivity.mBaseBeacon.name.add(MainActivity.mBaseDevices.name.get(pos));
@@ -201,8 +201,7 @@ public class MainDeviceList extends AppCompatActivity{
 
             if (String.valueOf(etName.getText()).length() > 0) {
                 nameBeacon = String.valueOf(etName.getText());
-            }
-            else {
+            } else {
                 nameBeacon = MainActivity.mBaseDevices.name.get(pos);
             }
             String addressBeacon = MainActivity.mBaseDevices.address.get(pos);
@@ -210,13 +209,32 @@ public class MainDeviceList extends AppCompatActivity{
             Integer posYbeacon = new Integer(String.valueOf(etY.getText()));
             Integer posZbeacon = new Integer(String.valueOf(etZ.getText()));
 
+            Integer nBeacon;
+            Integer powerBeacon;
+
+            if (String.valueOf(etN.getText()).length() > 0) {
+                nBeacon = new Integer(String.valueOf(etN.getText()));
+            } else {
+                nBeacon = 2;
+            }
+
+            if (String.valueOf(etPower.getText()).length() > 0) {
+                powerBeacon = new Integer(String.valueOf(etPower.getText()));
+                if (powerBeacon > 0) {
+                    powerBeacon = -powerBeacon;
+                }
+            } else {
+                powerBeacon = -68;
+            }
+
+
             //добавление данных в БД SQLite
 
             dbBeacon.open(); //открытие БД для записи и чтения
 
             ContentValues contentValues = new ContentValues();
 
-            dbBeacon.addRec(nameBeacon, addressBeacon, posXbeacon, posYbeacon, posZbeacon);
+            dbBeacon.addRec(nameBeacon, addressBeacon, posXbeacon, posYbeacon, posZbeacon, nBeacon, powerBeacon);
 
             //Вывод логов о добавлении в консоль
 
@@ -230,16 +248,20 @@ public class MainDeviceList extends AppCompatActivity{
                 int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
                 int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
 
-                    do {
-                        Log.d("mLog", "ID = " + cursor.getInt(idIndex) +
-                                ", NAME = " + cursor.getString(nameIndex) +
-                                ", ADDRESS = " + cursor.getString(addressIndex) +
-                                ", X = " + cursor.getInt(xIndex) +
-                                ", Y = " + cursor.getInt(yIndex) +
-                                ", Z = " + cursor.getInt(zIndex));
-                    } while (cursor.moveToNext());
-            }
-            else {
+                int nIndex = cursor.getColumnIndex(DBBeacon.KEY_N);
+                int powerIndex = cursor.getColumnIndex(DBBeacon.KEY_POWER);
+
+                do {
+                    Log.d("mLog", "ID = " + cursor.getInt(idIndex) +
+                            ", NAME = " + cursor.getString(nameIndex) +
+                            ", ADDRESS = " + cursor.getString(addressIndex) +
+                            ", X = " + cursor.getInt(xIndex) +
+                            ", Y = " + cursor.getInt(yIndex) +
+                            ", Z = " + cursor.getInt(zIndex) +
+                            ", N = " + cursor.getInt(nIndex) +
+                            ", MeasuredPower = " + cursor.getInt(powerIndex));
+                } while (cursor.moveToNext());
+            } else {
                 Log.d("mLog", "0 rows");
             }
 
@@ -254,9 +276,8 @@ public class MainDeviceList extends AppCompatActivity{
             startActivity(intent);
             overridePendingTransition(0, 0);
             finish();
-        }
-        else{
-            Toast.makeText(this,"Для начала заполните поля!", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Для начала заполните поля!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -284,17 +305,28 @@ public class MainDeviceList extends AppCompatActivity{
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
 
+    }
 
+    @Override
+    public void onDestroy() {
+
+        try{
+            if(mReceiver!=null)
+                unregisterReceiver(mReceiver);
+
+        }catch(Exception e){}
+
+        super.onDestroy();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void checkPermissionLocation() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             int check = checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
             check += checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
 
-            if (check != 0){
-                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1002);
+            if (check != 0) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1002);
             }
         }
     }
@@ -303,24 +335,24 @@ public class MainDeviceList extends AppCompatActivity{
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)){
+            if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
                 //Toast.makeText(MainActivity.this, "Поиск начался", Toast.LENGTH_LONG).show();
 
                 mProgressDialog = ProgressDialog.show(MainDeviceList.this, "Поиск устройств", "Пожалуйста подождите");
 
                 MainActivity.mBaseDevices = new BaseDevices();
             }
-            if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){
+            if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
 
                 mProgressDialog.dismiss();
 
                 //Toast.makeText(MainActivity.this, "Поиск завершен", Toast.LENGTH_LONG).show();
                 showListDevices();
             }
-            if (action.equals(BluetoothDevice.ACTION_FOUND)){
+            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device != null){
-                    if (!mDevices.contains(device)){
+                if (device != null) {
+                    if (!mDevices.contains(device)) {
 
                         //добавляем устройство в базу устройств
                         if (checkCopy(device.getAddress())) {
@@ -351,7 +383,7 @@ public class MainDeviceList extends AppCompatActivity{
         if (cursor.moveToFirst()) {
             int addressIndex = cursor.getColumnIndex(DBBeacon.KEY_ADDRESS);
             do {
-                if (cursor.getString(addressIndex).equals(address)){
+                if (cursor.getString(addressIndex).equals(address)) {
                     check = false;
                 }
             } while (cursor.moveToNext());
@@ -378,17 +410,20 @@ public class MainDeviceList extends AppCompatActivity{
 
         mSpinner = (Spinner) findViewById(R.id.spinner);
         mSpinner.setAdapter(adapter);
+
+        mSpinner.setSelection(0);
+        mSpinner.setOnItemSelectedListener(itemListener);
     }
 
     //отслеживание нажатий на экран
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus)
-    {
+    public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
+
 }

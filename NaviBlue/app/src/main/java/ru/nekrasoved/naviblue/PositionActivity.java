@@ -32,6 +32,10 @@ import java.util.ArrayList;
 
 public class PositionActivity extends AppCompatActivity {
 
+    float last_x = 0;
+    float last_y = 0;
+    float last_z = 0;
+
     BluetoothManager btManager;
     BluetoothAdapter btAdapter;
     BluetoothLeScanner btScanner;
@@ -55,11 +59,12 @@ public class PositionActivity extends AppCompatActivity {
 
     double[][] matrixDistance; //матрица дистанций до маяков
     int[][] matrixCoordinate; //координаты маяков
+    int[] matrixPower; // матрица мощностей у маячков
 
     public static ArrayList <String> filtrBeacons; //фильтрация маячков с расстоянием для вывода
 
-    double measuredPower = -50; //потери в свободном пространстве на расстоянии d0
-    double n = 2; //коэффициент погрешности зависящий от типа помещения и т.п.
+    //double measuredPower = -50; //потери в свободном пространстве на расстоянии d0
+    //double n = 2; //коэффициент погрешности зависящий от типа помещения и т.п.
 
 
 
@@ -298,6 +303,7 @@ public class PositionActivity extends AppCompatActivity {
 
     // Device scan callback.
     private ScanCallback leScanCallback = new ScanCallback() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
 
@@ -347,6 +353,7 @@ public class PositionActivity extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void showBeacons() {
         dbBeacon.open();
         Cursor cursor = dbBeacon.beaconList(filtr);
@@ -357,6 +364,9 @@ public class PositionActivity extends AppCompatActivity {
 
             matrixCoordinate = new int[3][filtr];
             matrixDistance = new double[1][filtr];
+
+            matrixPower = new int[filtr];
+
             int i = 0;
 
             if (cursor.moveToFirst()){
@@ -365,19 +375,35 @@ public class PositionActivity extends AppCompatActivity {
                 int xIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_X);
                 int yIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Y);
                 int zIndex = cursor.getColumnIndex(DBBeacon.KEY_POS_Z);
+
+                int nIndex = cursor.getColumnIndex(DBBeacon.KEY_N);
+                int powerIndex = cursor.getColumnIndex(DBBeacon.KEY_POWER);
+
                 do {
                     double rssi = dbBeacon.beaconSignal(cursor.getString(addressIndex), count);
-                    double distance = getDistance(rssi);
-                    Log.d("Logm", cursor.getString(nameIndex) + " :: " + cursor.getString(addressIndex) +
-                            " : " + rssi);
-                    filtrBeacons.add(cursor.getString(nameIndex) + " :: " +
-                            " : rssi = " + rssi + " : dist = " + distance);
+
+
+                    int power = Integer.valueOf(cursor.getString(powerIndex));
+                    int n = Integer.valueOf(cursor.getString(nIndex));
+
+                    double distance = getDistance(rssi, n, power);
 
                     //заполняем матрицы
                     matrixDistance[0][i] = distance;
                     matrixCoordinate[0][i]= Integer.valueOf(cursor.getString(xIndex));
                     matrixCoordinate[1][i]= Integer.valueOf(cursor.getString(yIndex));
                     matrixCoordinate[2][i]= Integer.valueOf(cursor.getString(zIndex));
+
+                    matrixPower[i] = power;
+
+                    distance = Math.round(distance * 100);
+                    distance = distance/100;
+
+                    Log.d("Logm", cursor.getString(nameIndex) + " :: " + cursor.getString(addressIndex) +
+                            " : " + rssi);
+                    filtrBeacons.add(cursor.getString(nameIndex) + " :: " +
+                            " : rssi = " + rssi + " : dist = " + distance);
+
                     Log.d("LogMatrix", matrixDistance[0][i] + ", X: " + matrixCoordinate[0][i] +
                             ", Y: " + matrixCoordinate[1][i] + ", Z: "+ matrixCoordinate[2][i]);
                     i++;
@@ -396,9 +422,9 @@ public class PositionActivity extends AppCompatActivity {
                     TextView posY = (TextView) findViewById(R.id.tv_pos_Y);
                     TextView posZ = (TextView) findViewById(R.id.tv_pos_Z);
 
-                    posX.setText("X = NaN");
-                    posY.setText("Y = NaN");
-                    posZ.setText("Z = NaN");
+                    posX.setText("Координаты");
+                    posY.setText("не известны,");
+                    posZ.setText("маячков < 3");
                 }
                 else{
                     getPosition();
@@ -423,10 +449,10 @@ public class PositionActivity extends AppCompatActivity {
     }
 
     //расчет дистанции до маяка
-    public double getDistance(double rssi) {
+    public double getDistance(double rssi, int n, int power) {
 
         double distance = 0;
-        distance = Math.pow(10, ((measuredPower - rssi)/(10 * n)));
+        distance = Math.pow(10, ((power - rssi)/(10 * n)));
         Log.d("Logm", "DISTANCE = " + distance + " : " + rssi);
         return distance;
     }
@@ -435,7 +461,7 @@ public class PositionActivity extends AppCompatActivity {
     //определение координат относительно маяков
     public void getPosition() {
 
-        float u_star = (float) measuredPower;
+       // float u_star = (float) measuredPower;
         float m = -16;
         float sig_u = 5;
 
@@ -465,6 +491,7 @@ public class PositionActivity extends AppCompatActivity {
                 }
             }
         }
+
         for (int en = 0; en < 10; en++){
 
             for (int j = 0; j < mn[1]; j++){
@@ -478,8 +505,8 @@ public class PositionActivity extends AppCompatActivity {
                     h[(j)*mn[0] + i][1] = (float) ((yop - matrixCoordinate[1][j])/rop[j][0]*derv[j][0]);
                     h[(j)*mn[0] + i][2] = (float)((zop - matrixCoordinate[2][j])/rop[j][0]*derv[j][0]);
 
-                    z[(j)*mn[0] + i][0] = u_star + m * Math.log10(matrixDistance[i][j]) -
-                            (u_star + m * Math.log10(rop[j][i]));
+                    z[(j)*mn[0] + i][0] = matrixPower[i] + m * Math.log10(matrixDistance[i][j]) -
+                            (matrixPower[i] + m * Math.log10(rop[j][i]));
                 }
             }
 
@@ -582,9 +609,9 @@ public class PositionActivity extends AppCompatActivity {
             if (zop < 0){
                 zop = Math.abs(zop);
             }
-            Log.d("Coordinates", "X: " + xop);
-            Log.d("Coordinates", "Y: " + yop);
-            Log.d("Coordinates", "Z: " + zop);
+            Log.d("LogmCoordinates", "X: " + xop);
+            Log.d("LogmCoordinates", "Y: " + yop);
+            Log.d("LogmCoordinates", "Z: " + zop);
         }
 
         //вывод координат на экран в приложении
@@ -593,6 +620,15 @@ public class PositionActivity extends AppCompatActivity {
         TextView posY = (TextView) findViewById(R.id.tv_pos_Y);
         TextView posZ = (TextView) findViewById(R.id.tv_pos_Z);
 
+        if (String.valueOf(xop) == "NaN"){
+            xop = last_x;
+            yop = last_y;
+            zop = last_z;
+        } else{
+            last_x = xop;
+            last_y = yop;
+            last_z = zop;
+        }
         posX.setText("X = "+ xop);
         posY.setText("Y = "+ yop);
         posZ.setText("Z = "+ zop);
